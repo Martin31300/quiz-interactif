@@ -161,3 +161,85 @@ button:hover {
   font-size: 1.2em;
   margin-bottom: 10px;
 }
+
+/* ===================================================================
+   Mode sombre (Sprint 2) — bouton + surcharges du thème
+   =================================================================== */
+#theme-toggle {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  margin: 0;
+  padding: 8px 14px;
+  font-size: 0.85em;
+  background-color: #37474f;
+}
+
+#theme-toggle:hover {
+  background-color: #263238;
+}
+
+body.dark-mode {
+  background: #121212;
+  color: #e0e0e0;
+}
+
+body.dark-mode .notice,
+body.dark-mode .field-label,
+body.dark-mode #progress {
+  color: #b0bec5;
+}
+
+body.dark-mode #intro-screen,
+body.dark-mode #question-screen,
+body.dark-mode #result-screen {
+  background: #1e1e1e;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode #answers button,
+body.dark-mode #theme-picker button {
+  background-color: #2c2c2c;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+body.dark-mode #answers button:hover,
+body.dark-mode #theme-picker button:hover {
+  background-color: #383838;
+}
+
+body.dark-mode #theme-picker button.selected {
+  background-color: #1976d2;
+  color: #fff;
+  border-color: #1976d2;
+}
+
+/* Le feedback reste lisible : texte foncé sur pastilles claires */
+body.dark-mode .correct {
+  color: #052e16;
+}
+body.dark-mode .wrong {
+  color: #450a0a;
+}
+
+body.dark-mode #difficulty-badge {
+  background: #2c2c2c;
+  color: #e0e0e0;
+}
+
+body.dark-mode #hint-btn {
+  background-color: #4a3f1e;
+  color: #ffe082;
+  border-color: #6d5b1f;
+}
+
+body.dark-mode #hint-text {
+  background: #4a3f1e;
+  color: #ffe9b0;
+  border-left-color: #ffca28;
+}
+
+body.dark-mode #result-screen h2 {
+  color: #81c784;
+}

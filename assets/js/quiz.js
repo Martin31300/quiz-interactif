@@ -18,6 +18,7 @@ import {
   shuffle,
 } from "./utils.js";
 import { quizData } from "./data.js";
+import { initDarkMode } from "./theme.js";
 
 // Mélange les réponses d'une question en recalculant l'index correct.
 const shuffleAnswers = (question) => {
@@ -93,6 +94,7 @@ nextBtn.addEventListener("click", nextQuestion);
 restartBtn.addEventListener("click", restartQuiz);
 hintBtn.addEventListener("click", revealHint);
 
+initDarkMode(getElement("#theme-toggle")); // mode sombre (préférence mémorisée)
 renderThemePicker();
 selectTheme(Object.keys(quizData)[0]); // thème sélectionné par défaut
 

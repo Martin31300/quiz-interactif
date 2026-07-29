@@ -21,6 +21,8 @@ Un quiz interactif en HTML/CSS/JS permettant :
   chaque partie, sans jamais altérer les données sources.
 - **Difficulté progressive** : questions ordonnées de facile → difficile,
   temps de réponse décroissant, badge de niveau (🟢/🟠/🔴).
+- **Mode sombre** : bouton pour basculer clair/sombre ; la préférence est
+  mémorisée entre les sessions (`localStorage`).
 
 ## Installation
 
