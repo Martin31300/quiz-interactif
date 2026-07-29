@@ -20,18 +20,12 @@ import { quizData } from "./data.js";
 import { initDarkMode, refreshDarkModeLabel } from "./theme.js";
 import { getLang, setLang, t, applyTranslations } from "./i18n.js";
 
-// Mélange les réponses d'une question en recalculant l'index correct.
-const shuffleAnswers = (question) => {
-  const correctText = question.answers[question.correct];
-  const answers = shuffle(question.answers);
-  return { ...question, answers, correct: answers.indexOf(correctText) };
-};
-
-// Prépare une partie :
+// Prépare une partie (les questions restent BILINGUES) :
 // - difficulté progressive : questions ordonnées de facile à difficile ;
-// - mélange : l'ordre est brassé À L'INTÉRIEUR de chaque niveau, et les
-//   réponses sont mélangées à chaque partie.
-// On travaille sur des copies pour ne jamais altérer quizData.
+// - mélange : ordre brassé À L'INTÉRIEUR de chaque niveau, + un ordre de
+//   réponses (`order`, permutation d'indices) tiré une fois par question.
+// La langue n'est PAS résolue ici mais à l'affichage — ainsi, changer de
+// langue en cours de partie retraduit la question courante.
 const prepareQuestions = (source) => {
   const byLevel = new Map();
   source.forEach((q) => {
@@ -44,17 +38,21 @@ const prepareQuestions = (source) => {
   const ordered = [];
   levels.forEach((level) => shuffle(byLevel.get(level)).forEach((q) => ordered.push(q)));
 
-  return ordered.map(shuffleAnswers);
+  return ordered.map((q) => {
+    const order = shuffle(q.answers.fr.map((_, i) => i)); // ordre des réponses
+    return { ...q, order, correct: order.indexOf(q.correct) };
+  });
 };
 
 // Libellé traduit d'un niveau de difficulté (🟢/🟠/🔴).
 const difficultyLabel = (level) => t(`diff${level}`);
 
-// Traduit une question dans la langue courante. L'index de la bonne
-// réponse (`correct`) reste valable : les tableaux fr/en sont parallèles.
+// Résout une question préparée dans la langue courante : texte + réponses
+// (dans l'ordre `order`). `correct` est déjà l'index dans ce nouvel ordre,
+// et reste valable quelle que soit la langue (tableaux fr/en parallèles).
 const localizeQuestion = (q) => ({
   text: q.text[getLang()],
-  answers: q.answers[getLang()],
+  answers: q.order.map((i) => q.answers[getLang()][i]),
   correct: q.correct,
   difficulty: q.difficulty,
   timeLimit: q.timeLimit,
@@ -121,6 +119,15 @@ function changeLanguage(event) {
   refreshDarkModeLabel();
   renderThemePicker();
   if (currentTheme) selectTheme(currentTheme);
+
+  // Partie en cours : retraduire la question affichée dans la nouvelle langue.
+  if (questionScreen.style.display !== "none" && questions.length) {
+    showQuestion();
+  }
+  // Écran de résultat : retraduire la ligne de score.
+  if (resultScreen.style.display !== "none") {
+    setText(scoreText, `${t("yourScore")} ${score} / ${questions.length}`);
+  }
 }
 
 // Génère un bouton par thème disponible.
@@ -145,9 +152,7 @@ function selectTheme(themeKey) {
 function startQuiz() {
   if (!currentTheme) return; // aucun thème choisi
 
-  questions = prepareQuestions(
-    quizData[currentTheme].questions.map(localizeQuestion)
-  );
+  questions = prepareQuestions(quizData[currentTheme].questions);
 
   hideElement(introScreen);
   showElement(questionScreen);
@@ -163,7 +168,7 @@ function startQuiz() {
 function showQuestion() {
   clearInterval(timerId);
 
-  const q = questions[currentQuestionIndex];
+  const q = localizeQuestion(questions[currentQuestionIndex]);
   setText(questionText, q.text);
   setText(currentQuestionIndexSpan, currentQuestionIndex + 1);
   setText(difficultyBadge, difficultyLabel(q.difficulty));
@@ -204,7 +209,7 @@ function setupHint(q) {
 function revealHint() {
   const q = questions[currentQuestionIndex];
   if (!q || !q.hint) return;
-  setText(hintText, `💡 ${q.hint}`);
+  setText(hintText, `💡 ${q.hint[getLang()]}`);
   hintText.classList.remove("hidden");
   hintBtn.disabled = true;
 }
