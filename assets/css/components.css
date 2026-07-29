@@ -8,6 +8,26 @@
   color: #455a64;
 }
 
+/* --- Sélecteur de langue (changement de langue) --- */
+#lang-switcher {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85em;
+}
+
+#lang-switcher select {
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid #cfd8dc;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+}
+
 /* --- Sélecteur de thème (mode multi-thème) --- */
 #theme-picker {
   display: flex;
