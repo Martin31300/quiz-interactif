@@ -5,6 +5,8 @@ import {
   hideElement,
   setText,
   createAnswerButton,
+  createThemeButton,
+  setSelectedTheme,
   updateScoreDisplay,
   lockAnswers,
   markCorrectAnswer,
@@ -14,27 +16,18 @@ import {
   saveToLocalStorage,
   startTimer,
 } from "./utils.js";
+import { quizData } from "./data.js";
 
 console.log("Quiz JS loaded...");
 
-const questions = [
-  {
-    text: "Quelle est la capitale de la France ?",
-    answers: ["Marseille", "Paris", "Lyon", "Bordeaux"],
-    correct: 1,
-    timeLimit: 10,
-  },
-  {
-    text: "Combien font 2 + 3 ?",
-    answers: ["3", "4", "5", "1"],
-    correct: 2,
-    timeLimit: 5,
-  },
-];
+// Clé de sauvegarde du meilleur score, propre à chaque thème.
+const bestScoreKey = (theme) => `bestScore_${theme}`;
 
+let currentTheme = null; // thème sélectionné (ex. "culture")
+let questions = []; // questions de la partie en cours
 let currentQuestionIndex = 0;
 let score = 0;
-let bestScore = loadFromLocalStorage("bestScore", 0);
+let bestScore = 0;
 let timerId = null;
 
 // DOM Elements
@@ -42,6 +35,7 @@ const introScreen = getElement("#intro-screen");
 const questionScreen = getElement("#question-screen");
 const resultScreen = getElement("#result-screen");
 
+const themePicker = getElement("#theme-picker");
 const bestScoreValue = getElement("#best-score-value");
 const bestScoreEnd = getElement("#best-score-end");
 
@@ -62,9 +56,33 @@ startBtn.addEventListener("click", startQuiz);
 nextBtn.addEventListener("click", nextQuestion);
 restartBtn.addEventListener("click", restartQuiz);
 
-setText(bestScoreValue, bestScore);
+renderThemePicker();
+selectTheme(Object.keys(quizData)[0]); // thème sélectionné par défaut
+
+// Génère un bouton par thème disponible.
+function renderThemePicker() {
+  themePicker.innerHTML = "";
+  Object.keys(quizData).forEach((themeKey) => {
+    const btn = createThemeButton(quizData[themeKey].label, () =>
+      selectTheme(themeKey)
+    );
+    themePicker.appendChild(btn);
+  });
+}
+
+// Sélectionne un thème : met à jour l'UI et le meilleur score affiché.
+function selectTheme(themeKey) {
+  currentTheme = themeKey;
+  bestScore = loadFromLocalStorage(bestScoreKey(themeKey), 0);
+  setSelectedTheme(themePicker, quizData[themeKey].label);
+  setText(bestScoreValue, bestScore);
+}
 
 function startQuiz() {
+  if (!currentTheme) return; // aucun thème choisi
+
+  questions = quizData[currentTheme].questions;
+
   hideElement(introScreen);
   showElement(questionScreen);
 
@@ -135,7 +153,7 @@ function endQuiz() {
 
   if (score > bestScore) {
     bestScore = score;
-    saveToLocalStorage("bestScore", bestScore);
+    saveToLocalStorage(bestScoreKey(currentTheme), bestScore);
   }
   setText(bestScoreEnd, bestScore);
 }

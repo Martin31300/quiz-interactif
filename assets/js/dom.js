@@ -11,6 +11,25 @@ export const createAnswerButton = (text, onClick) => {
   return btn;
 };
 
+// Bouton de sélection d'un thème (Sprint 2 : mode multi-thème).
+export const createThemeButton = (label, onClick) => {
+  const btn = document.createElement("button");
+  btn.className = "theme-btn";
+  btn.textContent = label;
+  btn.setAttribute("aria-pressed", "false");
+  btn.addEventListener("click", onClick);
+  return btn;
+};
+
+// Marque le bouton de thème sélectionné parmi une liste de boutons.
+export const setSelectedTheme = (container, selectedLabel) => {
+  container.querySelectorAll("button").forEach((btn) => {
+    const isSelected = btn.textContent === selectedLabel;
+    btn.classList.toggle("selected", isSelected);
+    btn.setAttribute("aria-pressed", String(isSelected));
+  });
+};
+
 export const updateScoreDisplay = (scoreElement, score, total) => {
   scoreElement.textContent = `Votre score : ${score} / ${total}`;
 };
