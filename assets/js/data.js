@@ -2,6 +2,8 @@
 // Banque de questions organisée par thème (Sprint 2 : mode multi-thème).
 // Chaque question porte un niveau `difficulty` (1 = facile, 2 = moyen,
 // 3 = difficile). Le `timeLimit` se réduit quand la difficulté augmente.
+// Certaines questions (surtout les plus dures) proposent un `hint` :
+// un indice textuel affiché à la demande via le bouton « Indice ».
 export const quizData = {
   culture: {
     label: "🌍 Culture générale",
@@ -26,6 +28,7 @@ export const quizData = {
         correct: 2,
         difficulty: 2,
         timeLimit: 9,
+        hint: "Un génie de la Renaissance italienne, aussi inventeur.",
       },
       {
         text: "Quelle planète est la plus proche du Soleil ?",
@@ -33,6 +36,7 @@ export const quizData = {
         correct: 2,
         difficulty: 2,
         timeLimit: 9,
+        hint: "Elle porte le nom du messager des dieux romains.",
       },
       {
         text: "En quelle année a eu lieu la Révolution française ?",
@@ -40,6 +44,7 @@ export const quizData = {
         correct: 0,
         difficulty: 3,
         timeLimit: 6,
+        hint: "Prise de la Bastille : fin du XVIIIe siècle.",
       },
     ],
   },
@@ -67,6 +72,7 @@ export const quizData = {
         correct: 1,
         difficulty: 2,
         timeLimit: 8,
+        hint: "C'est un nombre pair, juste au-dessus de 55.",
       },
       {
         text: "Quelle est la racine carrée de 81 ?",
@@ -74,6 +80,7 @@ export const quizData = {
         correct: 2,
         difficulty: 2,
         timeLimit: 8,
+        hint: "Ce nombre au carré donne 81 (indice : 9 × 9).",
       },
       {
         text: "Quel est le résultat de 15 % de 200 ?",
@@ -81,6 +88,7 @@ export const quizData = {
         correct: 2,
         difficulty: 3,
         timeLimit: 6,
+        hint: "10 % de 200 = 20, ajoute la moitié de 20.",
       },
     ],
   },
@@ -113,6 +121,7 @@ export const quizData = {
         correct: 0,
         difficulty: 2,
         timeLimit: 9,
+        hint: "« Cascading » = en cascade.",
       },
       {
         text: "Où stocke-t-on des données côté navigateur (persistant) ?",
@@ -120,6 +129,7 @@ export const quizData = {
         correct: 1,
         difficulty: 2,
         timeLimit: 9,
+        hint: "Son nom contient « storage » et commence par « local ».",
       },
       {
         text: "Quelle méthode ajoute un écouteur d'événement en JS ?",
@@ -127,6 +137,7 @@ export const quizData = {
         correct: 2,
         difficulty: 3,
         timeLimit: 6,
+        hint: "Elle contient les mots « add », « Event » et « Listener ».",
       },
     ],
   },

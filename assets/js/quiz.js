@@ -84,10 +84,14 @@ const currentQuestionIndexSpan = getElement("#current-question-index");
 const totalQuestionsSpan = getElement("#total-questions");
 const difficultyBadge = getElement("#difficulty-badge");
 
+const hintBtn = getElement("#hint-btn");
+const hintText = getElement("#hint-text");
+
 // Init
 startBtn.addEventListener("click", startQuiz);
 nextBtn.addEventListener("click", nextQuestion);
 restartBtn.addEventListener("click", restartQuiz);
+hintBtn.addEventListener("click", revealHint);
 
 renderThemePicker();
 selectTheme(Object.keys(quizData)[0]); // thème sélectionné par défaut
@@ -142,6 +146,7 @@ function showQuestion() {
   });
 
   nextBtn.classList.add("hidden");
+  setupHint(q);
 
   timeLeftSpan.textContent = q.timeLimit;
   timerId = startTimer(
@@ -152,6 +157,27 @@ function showQuestion() {
       nextBtn.classList.remove("hidden");
     }
   );
+}
+
+// Indice par question : n'affiche le bouton que si un indice existe.
+function setupHint(q) {
+  hintText.classList.add("hidden");
+  setText(hintText, "");
+  if (q.hint) {
+    hintBtn.disabled = false;
+    hintBtn.classList.remove("hidden");
+  } else {
+    hintBtn.classList.add("hidden");
+  }
+}
+
+// Révèle l'indice de la question courante (une seule fois).
+function revealHint() {
+  const q = questions[currentQuestionIndex];
+  if (!q || !q.hint) return;
+  setText(hintText, `💡 ${q.hint}`);
+  hintText.classList.remove("hidden");
+  hintBtn.disabled = true;
 }
 
 function selectAnswer(index, btn) {

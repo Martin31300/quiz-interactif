@@ -42,6 +42,15 @@ un défi intéressant.
 - [x] Mélange appliqué **à l'intérieur** de chaque niveau (compat. US-06).
 - [x] Niveau affiché pendant le quiz (🟢/🟠/🔴).
 
+### US-12 — Indice par question · `feature/indice-par-question`
+En tant que joueur, je veux un **indice** pour certaines questions
+difficiles afin de m'aider en cas de doute.
+- [x] Un bouton « Indice » donne un indice textuel.
+- [x] Le bouton n'apparaît que si la question possède un indice
+      (questions moyennes / difficiles).
+- [x] L'indice se révèle au clic et le bouton se désactive ensuite.
+- [x] L'indice est réinitialisé à chaque nouvelle question.
+
 ---
 
 ## 💡 Backlog restant (sprints futurs)
