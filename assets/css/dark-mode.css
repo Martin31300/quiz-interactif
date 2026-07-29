@@ -35,18 +35,21 @@ body.dark-mode #result-screen {
 }
 
 body.dark-mode #answers button,
-body.dark-mode #theme-picker button {
+body.dark-mode #theme-picker button,
+body.dark-mode #mode-picker button {
   background-color: #2c2c2c;
   color: #e0e0e0;
   border-color: #444;
 }
 
 body.dark-mode #answers button:hover,
-body.dark-mode #theme-picker button:hover {
+body.dark-mode #theme-picker button:hover,
+body.dark-mode #mode-picker button:hover {
   background-color: #383838;
 }
 
-body.dark-mode #theme-picker button.selected {
+body.dark-mode #theme-picker button.selected,
+body.dark-mode #mode-picker button.selected {
   background-color: #1976d2;
   color: #fff;
   border-color: #1976d2;

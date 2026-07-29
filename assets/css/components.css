@@ -28,8 +28,9 @@
   cursor: pointer;
 }
 
-/* --- Sélecteur de thème (mode multi-thème) --- */
-#theme-picker {
+/* --- Sélecteurs de thème et de mode (boutons "pilule") --- */
+#theme-picker,
+#mode-picker {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -37,7 +38,8 @@
   margin-bottom: 15px;
 }
 
-#theme-picker button {
+#theme-picker button,
+#mode-picker button {
   margin: 0;
   padding: 8px 14px;
   border-radius: 20px;
@@ -46,11 +48,13 @@
   border: 1px solid #cfd8dc;
 }
 
-#theme-picker button:hover {
+#theme-picker button:hover,
+#mode-picker button:hover {
   background-color: #e0e0e0;
 }
 
-#theme-picker button.selected {
+#theme-picker button.selected,
+#mode-picker button.selected {
   background-color: #1976d2;
   color: #fff;
   border-color: #1976d2;

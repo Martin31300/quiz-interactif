@@ -64,12 +64,25 @@ console.log("Quiz JS loaded...");
 // Clé de sauvegarde du meilleur score, propre à chaque thème.
 const bestScoreKey = (theme) => `bestScore_${theme}`;
 
+// Modes de jeu (Sprint 2) :
+// - normal    : minuteur par question + score
+// - chrono    : minuteur GLOBAL unique pour tout le quiz + score
+// - flashcard : entraînement, sans minuteur ni score
+const MODES = [
+  { key: "normal", labelKey: "modeNormal" },
+  { key: "chrono", labelKey: "modeChrono" },
+  { key: "flashcard", labelKey: "modeFlashcard" },
+];
+const CHRONO_SECONDS = 30; // temps global du mode contre-la-montre
+
 let currentTheme = null; // thème sélectionné (ex. "culture")
+let currentMode = "normal"; // mode de jeu sélectionné
 let questions = []; // questions de la partie en cours
 let currentQuestionIndex = 0;
 let score = 0;
 let bestScore = 0;
-let timerId = null;
+let timerId = null; // minuteur par question (mode normal)
+let globalTimerId = null; // minuteur global (mode chrono)
 
 // DOM Elements
 const introScreen = getElement("#intro-screen");
@@ -77,8 +90,11 @@ const questionScreen = getElement("#question-screen");
 const resultScreen = getElement("#result-screen");
 
 const themePicker = getElement("#theme-picker");
+const modePicker = getElement("#mode-picker");
 const bestScoreValue = getElement("#best-score-value");
 const bestScoreEnd = getElement("#best-score-end");
+const resultBestLine = getElement("#result-best-line");
+const timerDiv = getElement("#timer-div");
 
 const questionText = getElement("#question-text");
 const answersDiv = getElement("#answers");
@@ -111,6 +127,7 @@ langSelect.addEventListener("change", changeLanguage);
 initDarkMode(getElement("#theme-toggle")); // mode sombre (préférence mémorisée)
 renderThemePicker();
 selectTheme(Object.keys(quizData)[0]); // thème sélectionné par défaut
+renderModePicker(); // sélecteur de mode (normal par défaut)
 
 // Change la langue : traduit l'interface et rafraîchit les éléments dynamiques.
 function changeLanguage(event) {
@@ -118,15 +135,20 @@ function changeLanguage(event) {
   applyTranslations();
   refreshDarkModeLabel();
   renderThemePicker();
+  renderModePicker();
   if (currentTheme) selectTheme(currentTheme);
 
   // Partie en cours : retraduire la question affichée dans la nouvelle langue.
   if (questionScreen.style.display !== "none" && questions.length) {
     showQuestion();
   }
-  // Écran de résultat : retraduire la ligne de score.
+  // Écran de résultat : retraduire la ligne de score (ou le message flashcard).
   if (resultScreen.style.display !== "none") {
-    setText(scoreText, `${t("yourScore")} ${score} / ${questions.length}`);
+    if (currentMode === "flashcard") {
+      setText(scoreText, t("flashcardDone"));
+    } else {
+      setText(scoreText, `${t("yourScore")} ${score} / ${questions.length}`);
+    }
   }
 }
 
@@ -149,6 +171,31 @@ function selectTheme(themeKey) {
   setText(bestScoreValue, bestScore);
 }
 
+// Génère un bouton par mode de jeu disponible.
+function renderModePicker() {
+  modePicker.innerHTML = "";
+  MODES.forEach((mode) => {
+    const btn = createThemeButton(t(mode.labelKey), () => selectMode(mode.key));
+    btn.dataset.mode = mode.key;
+    modePicker.appendChild(btn);
+  });
+  highlightMode();
+}
+
+function selectMode(key) {
+  currentMode = key;
+  highlightMode();
+}
+
+// Met en évidence le mode sélectionné (par clé, robuste au changement de langue).
+function highlightMode() {
+  [...modePicker.children].forEach((btn) => {
+    const on = btn.dataset.mode === currentMode;
+    btn.classList.toggle("selected", on);
+    btn.setAttribute("aria-pressed", String(on));
+  });
+}
+
 function startQuiz() {
   if (!currentTheme) return; // aucun thème choisi
 
@@ -161,6 +208,17 @@ function startQuiz() {
   score = 0;
 
   setText(totalQuestionsSpan, questions.length);
+
+  // Mode contre-la-montre : un seul minuteur global pour tout le quiz.
+  clearInterval(globalTimerId);
+  if (currentMode === "chrono") {
+    setText(timeLeftSpan, CHRONO_SECONDS);
+    globalTimerId = startTimer(
+      CHRONO_SECONDS,
+      (timeLeft) => setText(timeLeftSpan, timeLeft),
+      () => endQuiz() // temps global écoulé → fin immédiate
+    );
+  }
 
   showQuestion();
 }
@@ -182,15 +240,25 @@ function showQuestion() {
   nextBtn.classList.add("hidden");
   setupHint(q);
 
-  timeLeftSpan.textContent = q.timeLimit;
-  timerId = startTimer(
-    q.timeLimit,
-    (timeLeft) => setText(timeLeftSpan, timeLeft),
-    () => {
-      lockAnswers(answersDiv);
-      nextBtn.classList.remove("hidden");
-    }
-  );
+  if (currentMode === "normal") {
+    // Minuteur par question.
+    showElement(timerDiv);
+    timeLeftSpan.textContent = q.timeLimit;
+    timerId = startTimer(
+      q.timeLimit,
+      (timeLeft) => setText(timeLeftSpan, timeLeft),
+      () => {
+        lockAnswers(answersDiv);
+        nextBtn.classList.remove("hidden");
+      }
+    );
+  } else if (currentMode === "chrono") {
+    // Le minuteur global (démarré dans startQuiz) reste affiché et continue.
+    showElement(timerDiv);
+  } else {
+    // Flashcard : aucun minuteur.
+    hideElement(timerDiv);
+  }
 }
 
 // Indice par question : n'affiche le bouton que si un indice existe.
@@ -215,16 +283,16 @@ function revealHint() {
 }
 
 function selectAnswer(index, btn) {
-  clearInterval(timerId);
+  clearInterval(timerId); // minuteur par question (sans effet en chrono/flashcard)
 
   const q = questions[currentQuestionIndex];
-  if (index === q.correct) {
-    score++;
-    btn.classList.add("correct");
-  } else {
-    btn.classList.add("wrong");
-  }
+  const isCorrect = index === q.correct;
 
+  // Le score n'est PAS compté en mode flashcard (entraînement).
+  if (isCorrect && currentMode !== "flashcard") score++;
+
+  // Feedback visuel dans tous les modes (utile aussi pour l'entraînement).
+  btn.classList.add(isCorrect ? "correct" : "wrong");
   markCorrectAnswer(answersDiv, q.correct);
   lockAnswers(answersDiv);
   nextBtn.classList.remove("hidden");
@@ -240,9 +308,20 @@ function nextQuestion() {
 }
 
 function endQuiz() {
+  clearInterval(timerId);
+  clearInterval(globalTimerId);
+
   hideElement(questionScreen);
   showElement(resultScreen);
 
+  // Flashcard : entraînement → pas de score ni de meilleur score.
+  if (currentMode === "flashcard") {
+    setText(scoreText, t("flashcardDone"));
+    hideElement(resultBestLine);
+    return;
+  }
+
+  showElement(resultBestLine);
   setText(scoreText, `${t("yourScore")} ${score} / ${questions.length}`);
 
   if (score > bestScore) {
@@ -253,6 +332,9 @@ function endQuiz() {
 }
 
 function restartQuiz() {
+  clearInterval(timerId);
+  clearInterval(globalTimerId);
+
   hideElement(resultScreen);
   showElement(introScreen);
 
