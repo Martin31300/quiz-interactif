@@ -15,8 +15,20 @@ import {
   loadFromLocalStorage,
   saveToLocalStorage,
   startTimer,
+  shuffle,
 } from "./utils.js";
 import { quizData } from "./data.js";
+
+// Mélange les réponses d'une question en recalculant l'index correct.
+const shuffleAnswers = (question) => {
+  const correctText = question.answers[question.correct];
+  const answers = shuffle(question.answers);
+  return { ...question, answers, correct: answers.indexOf(correctText) };
+};
+
+// Prépare une partie : ordre des questions mélangé + réponses mélangées.
+// On travaille sur des copies pour ne jamais altérer quizData.
+const prepareQuestions = (source) => shuffle(source).map(shuffleAnswers);
 
 console.log("Quiz JS loaded...");
 
@@ -81,7 +93,7 @@ function selectTheme(themeKey) {
 function startQuiz() {
   if (!currentTheme) return; // aucun thème choisi
 
-  questions = quizData[currentTheme].questions;
+  questions = prepareQuestions(quizData[currentTheme].questions);
 
   hideElement(introScreen);
   showElement(questionScreen);
