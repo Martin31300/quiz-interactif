@@ -26,9 +26,29 @@ const shuffleAnswers = (question) => {
   return { ...question, answers, correct: answers.indexOf(correctText) };
 };
 
-// Prépare une partie : ordre des questions mélangé + réponses mélangées.
+// Prépare une partie :
+// - difficulté progressive : questions ordonnées de facile à difficile ;
+// - mélange : l'ordre est brassé À L'INTÉRIEUR de chaque niveau, et les
+//   réponses sont mélangées à chaque partie.
 // On travaille sur des copies pour ne jamais altérer quizData.
-const prepareQuestions = (source) => shuffle(source).map(shuffleAnswers);
+const prepareQuestions = (source) => {
+  const byLevel = new Map();
+  source.forEach((q) => {
+    const level = q.difficulty || 1;
+    if (!byLevel.has(level)) byLevel.set(level, []);
+    byLevel.get(level).push(q);
+  });
+
+  const levels = [...byLevel.keys()].sort((a, b) => a - b);
+  const ordered = [];
+  levels.forEach((level) => shuffle(byLevel.get(level)).forEach((q) => ordered.push(q)));
+
+  return ordered.map(shuffleAnswers);
+};
+
+// Libellé lisible d'un niveau de difficulté.
+const difficultyLabel = (level) =>
+  ({ 1: "🟢 Facile", 2: "🟠 Moyen", 3: "🔴 Difficile" }[level] || "");
 
 console.log("Quiz JS loaded...");
 
@@ -62,6 +82,7 @@ const timeLeftSpan = getElement("#time-left");
 
 const currentQuestionIndexSpan = getElement("#current-question-index");
 const totalQuestionsSpan = getElement("#total-questions");
+const difficultyBadge = getElement("#difficulty-badge");
 
 // Init
 startBtn.addEventListener("click", startQuiz);
@@ -112,6 +133,7 @@ function showQuestion() {
   const q = questions[currentQuestionIndex];
   setText(questionText, q.text);
   setText(currentQuestionIndexSpan, currentQuestionIndex + 1);
+  setText(difficultyBadge, difficultyLabel(q.difficulty));
 
   answersDiv.innerHTML = "";
   q.answers.forEach((answer, index) => {
