@@ -38,6 +38,8 @@ let bestScore = loadFromLocalStorage("bestScore", 0);
 let timerId = null;
 // Historique des réponses
 let answersHistory = [];
+// Horodatage de l'affichage de la question courante, pour calculer le temps de réponse
+let questionStartTime = null;
 
 // DOM Elements
 const introScreen = getElement("#intro-screen");
@@ -60,6 +62,10 @@ const currentQuestionIndexSpan = getElement("#current-question-index");
 const totalQuestionsSpan = getElement("#total-questions");
 
 const recapBody = getElement("#recap-body");
+
+const statsCorrect = getElement("#stats-correct");
+const statsWrong = getElement("#stats-wrong");
+const statsAvgTime = getElement("#stats-avg-time");
 
 // Init
 startBtn.addEventListener("click", startQuiz);
@@ -96,6 +102,8 @@ function showQuestion() {
 
   nextBtn.classList.add("hidden");
 
+  questionStartTime = Date.now();
+
   timeLeftSpan.textContent = q.timeLimit;
   timerId = startTimer(
     q.timeLimit,
@@ -127,11 +135,13 @@ function selectAnswer(index, btn) {
 
 // Enregistre la réponse
 function recordAnswer(q, chosenIndex) {
+  const timeSpent = Math.min((Date.now() - questionStartTime) / 1000, q.timeLimit);
   answersHistory.push({
     questionText: q.text,
     chosenText: chosenIndex === null ? "Pas de réponse" : q.answers[chosenIndex],
     correctText: q.answers[q.correct],
     isCorrect: chosenIndex === q.correct,
+    timeSpent,
   });
 }
 
@@ -157,6 +167,19 @@ function endQuiz() {
   setText(bestScoreEnd, bestScore);
 
   renderRecap();
+  renderStats();
+}
+
+// Calcule et affiche les statistiques détaillées : bonnes/mauvaises réponses et temps moyen
+function renderStats() {
+  const correctCount = answersHistory.filter((entry) => entry.isCorrect).length;
+  const wrongCount = answersHistory.length - correctCount;
+  const totalTime = answersHistory.reduce((sum, entry) => sum + entry.timeSpent, 0);
+  const avgTime = answersHistory.length > 0 ? totalTime / answersHistory.length : 0;
+
+  setText(statsCorrect, correctCount);
+  setText(statsWrong, wrongCount);
+  setText(statsAvgTime, avgTime.toFixed(1));
 }
 
 // Affiche le tableau récapitulatif
