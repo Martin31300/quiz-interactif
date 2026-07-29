@@ -114,6 +114,15 @@ button:hover {
   color: #455a64;
 }
 
+#difficulty-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: #eceff1;
+  font-size: 0.85em;
+}
+
 #result-screen h2 {
   margin-bottom: 20px;
   color: #2e7d32; /* vert foncé */
