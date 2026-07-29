@@ -13,6 +13,15 @@ Un quiz interactif en HTML/CSS/JS permettant :
 3. Indicateur de progression.
 4. Meilleur score stocké localement.
 
+## Nouveautés — Sprint 2 🚀
+
+- **Mode multi-thème** : choix d'un thème sur l'accueil (Culture générale,
+  Maths, Web & Info). Le meilleur score est mémorisé **par thème**.
+- **Mélange aléatoire** (Fisher-Yates) des questions **et** des réponses à
+  chaque partie, sans jamais altérer les données sources.
+- **Difficulté progressive** : questions ordonnées de facile → difficile,
+  temps de réponse décroissant, badge de niveau (🟢/🟠/🔴).
+
 ## Installation
 
 1. Cloner ce dépôt :
@@ -34,12 +43,28 @@ Un quiz interactif en HTML/CSS/JS permettant :
 - Mode multi-thème.
 - Etc.
 
-## Workflow Git
+## Workflow Git (Gitflow)
 
-- **main** : version stable.
-- **develop** : pour intégrer les nouvelles features.
-- **feature/…** : chaque fonctionnalité.
+- **main** : version stable de référence (livrable du Sprint 1 de l'équipe
+  précédente) — on n'y touche pas pendant le sprint.
+- **develop** : intégration des fonctionnalités du Sprint 2.
+- **feature/…** : une branche par user story, issue de `develop` et mergée
+  dans `develop` (`--no-ff`).
+
+Branches du Sprint 2 : `feature/mode-multi-theme`,
+`feature/melange-questions`, `feature/difficulte-progressive`.
+
+## Documentation agile
+
+Voir le dossier [`docs/`](docs/) : rôles de l'équipe, sprint planning,
+backlog & user stories, rétrospective.
 
 ## Auteurs
 
-Ce projet sert d’exemple pédagogique pour comprendre la structure d’une application web simple, sa documentation et son organisation agile (backlog, user stories) et Gitflow.
+Projet pédagogique (structure d'une application web, documentation,
+organisation agile et Gitflow).
+
+Équipe Sprint 2 :
+
+- **Jonathan** — Scrum Master & Développeur
+- **Martin** — Product Owner & Développeur
