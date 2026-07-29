@@ -7,7 +7,6 @@ import {
   createAnswerButton,
   createThemeButton,
   setSelectedTheme,
-  updateScoreDisplay,
   lockAnswers,
   markCorrectAnswer,
 } from "./dom.js";
@@ -18,7 +17,8 @@ import {
   shuffle,
 } from "./utils.js";
 import { quizData } from "./data.js";
-import { initDarkMode } from "./theme.js";
+import { initDarkMode, refreshDarkModeLabel } from "./theme.js";
+import { getLang, setLang, t, applyTranslations } from "./i18n.js";
 
 // Mélange les réponses d'une question en recalculant l'index correct.
 const shuffleAnswers = (question) => {
@@ -47,9 +47,19 @@ const prepareQuestions = (source) => {
   return ordered.map(shuffleAnswers);
 };
 
-// Libellé lisible d'un niveau de difficulté.
-const difficultyLabel = (level) =>
-  ({ 1: "🟢 Facile", 2: "🟠 Moyen", 3: "🔴 Difficile" }[level] || "");
+// Libellé traduit d'un niveau de difficulté (🟢/🟠/🔴).
+const difficultyLabel = (level) => t(`diff${level}`);
+
+// Traduit une question dans la langue courante. L'index de la bonne
+// réponse (`correct`) reste valable : les tableaux fr/en sont parallèles.
+const localizeQuestion = (q) => ({
+  text: q.text[getLang()],
+  answers: q.answers[getLang()],
+  correct: q.correct,
+  difficulty: q.difficulty,
+  timeLimit: q.timeLimit,
+  hint: q.hint ? q.hint[getLang()] : undefined,
+});
 
 console.log("Quiz JS loaded...");
 
@@ -94,15 +104,30 @@ nextBtn.addEventListener("click", nextQuestion);
 restartBtn.addEventListener("click", restartQuiz);
 hintBtn.addEventListener("click", revealHint);
 
+// Langue : restaure le choix, traduit l'interface, branche le menu.
+const langSelect = getElement("#lang-select");
+langSelect.value = getLang();
+applyTranslations();
+langSelect.addEventListener("change", changeLanguage);
+
 initDarkMode(getElement("#theme-toggle")); // mode sombre (préférence mémorisée)
 renderThemePicker();
 selectTheme(Object.keys(quizData)[0]); // thème sélectionné par défaut
+
+// Change la langue : traduit l'interface et rafraîchit les éléments dynamiques.
+function changeLanguage(event) {
+  setLang(event.target.value);
+  applyTranslations();
+  refreshDarkModeLabel();
+  renderThemePicker();
+  if (currentTheme) selectTheme(currentTheme);
+}
 
 // Génère un bouton par thème disponible.
 function renderThemePicker() {
   themePicker.innerHTML = "";
   Object.keys(quizData).forEach((themeKey) => {
-    const btn = createThemeButton(quizData[themeKey].label, () =>
+    const btn = createThemeButton(quizData[themeKey].label[getLang()], () =>
       selectTheme(themeKey)
     );
     themePicker.appendChild(btn);
@@ -113,14 +138,16 @@ function renderThemePicker() {
 function selectTheme(themeKey) {
   currentTheme = themeKey;
   bestScore = loadFromLocalStorage(bestScoreKey(themeKey), 0);
-  setSelectedTheme(themePicker, quizData[themeKey].label);
+  setSelectedTheme(themePicker, quizData[themeKey].label[getLang()]);
   setText(bestScoreValue, bestScore);
 }
 
 function startQuiz() {
   if (!currentTheme) return; // aucun thème choisi
 
-  questions = prepareQuestions(quizData[currentTheme].questions);
+  questions = prepareQuestions(
+    quizData[currentTheme].questions.map(localizeQuestion)
+  );
 
   hideElement(introScreen);
   showElement(questionScreen);
@@ -211,7 +238,7 @@ function endQuiz() {
   hideElement(questionScreen);
   showElement(resultScreen);
 
-  updateScoreDisplay(scoreText, score, questions.length);
+  setText(scoreText, `${t("yourScore")} ${score} / ${questions.length}`);
 
   if (score > bestScore) {
     bestScore = score;
