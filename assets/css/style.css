@@ -46,6 +46,40 @@ button:hover {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+.field-label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #455a64;
+}
+
+/* Sélecteur de thème (Sprint 2 : mode multi-thème) */
+#theme-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+#theme-picker button {
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #cfd8dc;
+}
+
+#theme-picker button:hover {
+  background-color: #e0e0e0;
+}
+
+#theme-picker button.selected {
+  background-color: #1976d2;
+  color: #fff;
+  border-color: #1976d2;
+}
+
 #answers button {
   display: block;
   width: 60%;
