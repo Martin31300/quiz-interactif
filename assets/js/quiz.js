@@ -36,7 +36,7 @@ let currentQuestionIndex = 0;
 let score = 0;
 let bestScore = loadFromLocalStorage("bestScore", 0);
 let timerId = null;
-// Historique des réponses de la session, pour le récapitulatif des erreurs
+// Historique des réponses
 let answersHistory = [];
 
 // DOM Elements
@@ -125,7 +125,7 @@ function selectAnswer(index, btn) {
   nextBtn.classList.remove("hidden");
 }
 
-// Enregistre la réponse choisie (ou l'absence de réponse si timeout) pour le récapitulatif
+// Enregistre la réponse
 function recordAnswer(q, chosenIndex) {
   answersHistory.push({
     questionText: q.text,
@@ -159,7 +159,7 @@ function endQuiz() {
   renderRecap();
 }
 
-// Affiche le tableau récapitulatif : réponse choisie vs bonne réponse pour chaque question
+// Affiche le tableau récapitulatif
 function renderRecap() {
   recapBody.innerHTML = "";
   answersHistory.forEach((entry) => {
