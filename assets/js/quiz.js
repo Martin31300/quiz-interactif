@@ -256,8 +256,10 @@ function showQuestion() {
     // Le minuteur global (démarré dans startQuiz) reste affiché et continue.
     showElement(timerDiv);
   } else {
-    // Flashcard : aucun minuteur.
+    // Flashcard : aucun minuteur, et on peut avancer librement → le bouton
+    // « Suivant » est visible dès l'affichage (répondre reste optionnel).
     hideElement(timerDiv);
+    nextBtn.classList.remove("hidden");
   }
 }
 
