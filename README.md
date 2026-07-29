@@ -56,12 +56,3 @@ Un quiz interactif en HTML/CSS/JS permettant :
 Branches du Sprint 2 : `feature/mode-multi-theme`,
 `feature/melange-questions`, `feature/difficulte-progressive`.
 
-## Auteurs
-
-Projet pédagogique (structure d'une application web, documentation,
-organisation agile et Gitflow).
-
-Équipe Sprint 2 :
-
-- **Jonathan** — Scrum Master & Développeur
-- **Martin** — Product Owner & Développeur
