@@ -1,0 +1,66 @@
+/* components.css
+   Composants du Sprint 2 : sélecteur de thème (multi-thème) et
+   indice par question. */
+
+.field-label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #455a64;
+}
+
+/* --- Sélecteur de thème (mode multi-thème) --- */
+#theme-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+#theme-picker button {
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #cfd8dc;
+}
+
+#theme-picker button:hover {
+  background-color: #e0e0e0;
+}
+
+#theme-picker button.selected {
+  background-color: #1976d2;
+  color: #fff;
+  border-color: #1976d2;
+}
+
+/* --- Bouton et boîte d'indice (indice par question) --- */
+#hint-btn {
+  background-color: #fff8e1;
+  color: #8d6e00;
+  border: 1px solid #ffe082;
+  padding: 6px 14px;
+  font-size: 0.9em;
+}
+
+#hint-btn:hover {
+  background-color: #ffecb3;
+}
+
+#hint-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+#hint-text {
+  max-width: 80%;
+  margin: 6px auto 0;
+  padding: 8px 12px;
+  background: #fff8e1;
+  border-left: 4px solid #ffca28;
+  border-radius: 4px;
+  color: #5d4037;
+  font-style: italic;
+}
