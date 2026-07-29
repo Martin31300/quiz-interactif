@@ -17,20 +17,40 @@ import {
 
 console.log("Quiz JS loaded...");
 
-const questions = [
-  {
-    text: "Quelle est la capitale de la France ?",
-    answers: ["Marseille", "Paris", "Lyon", "Bordeaux"],
-    correct: 1,
-    timeLimit: 10,
-  },
-  {
-    text: "Combien font 2 + 3 ?",
-    answers: ["3", "4", "5", "1"],
-    correct: 2,
-    timeLimit: 5,
-  },
-];
+// Questions regroupées par thème
+const questionsByTheme = {
+  maths: [
+    {
+      text: "Combien font 2 + 3 ?",
+      answers: ["3", "4", "5", "1"],
+      correct: 2,
+      timeLimit: 5,
+    },
+    {
+      text: "Combien font 6 x 7 ?",
+      answers: ["40", "42", "36", "48"],
+      correct: 1,
+      timeLimit: 10,
+    },
+  ],
+  culture: [
+    {
+      text: "Quelle est la capitale de la France ?",
+      answers: ["Marseille", "Paris", "Lyon", "Bordeaux"],
+      correct: 1,
+      timeLimit: 10,
+    },
+    {
+      text: "Qui a peint la Joconde ?",
+      answers: ["Van Gogh", "Monet", "Léonard de Vinci", "Picasso"],
+      correct: 2,
+      timeLimit: 10,
+    },
+  ],
+};
+
+// Questions du thème
+let questions = [];
 
 let currentQuestionIndex = 0;
 let score = 0;
@@ -38,7 +58,6 @@ let bestScore = loadFromLocalStorage("bestScore", 0);
 let timerId = null;
 // Historique des réponses
 let answersHistory = [];
-// Horodatage de l'affichage de la question courante, pour calculer le temps de réponse
 let questionStartTime = null;
 
 // DOM Elements
@@ -53,6 +72,7 @@ const questionText = getElement("#question-text");
 const answersDiv = getElement("#answers");
 const nextBtn = getElement("#next-btn");
 const startBtn = getElement("#start-btn");
+const themeSelect = getElement("#theme-select");
 const restartBtn = getElement("#restart-btn");
 
 const scoreText = getElement("#score-text");
@@ -77,6 +97,8 @@ setText(bestScoreValue, bestScore);
 function startQuiz() {
   hideElement(introScreen);
   showElement(questionScreen);
+
+  questions = questionsByTheme[themeSelect.value];
 
   currentQuestionIndex = 0;
   score = 0;
@@ -170,7 +192,7 @@ function endQuiz() {
   renderStats();
 }
 
-// Calcule et affiche les statistiques détaillées : bonnes/mauvaises réponses et temps moyen
+// Calcule et affiche les statistiques
 function renderStats() {
   const correctCount = answersHistory.filter((entry) => entry.isCorrect).length;
   const wrongCount = answersHistory.length - correctCount;
@@ -182,7 +204,7 @@ function renderStats() {
   setText(statsAvgTime, avgTime.toFixed(1));
 }
 
-// Affiche le tableau récapitulatif
+//tableau récapitulatif
 function renderRecap() {
   recapBody.innerHTML = "";
   answersHistory.forEach((entry) => {

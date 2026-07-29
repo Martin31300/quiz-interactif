@@ -35,6 +35,14 @@ button:hover {
   display: none;
 }
 
+#theme-select {
+  display: block;
+  margin: 10px auto 15px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
 #intro-screen,
 #question-screen,
 #result-screen {
