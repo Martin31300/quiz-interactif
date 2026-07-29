@@ -36,6 +36,8 @@ let currentQuestionIndex = 0;
 let score = 0;
 let bestScore = loadFromLocalStorage("bestScore", 0);
 let timerId = null;
+// Historique des réponses de la session, pour le récapitulatif des erreurs
+let answersHistory = [];
 
 // DOM Elements
 const introScreen = getElement("#intro-screen");
@@ -57,6 +59,8 @@ const timeLeftSpan = getElement("#time-left");
 const currentQuestionIndexSpan = getElement("#current-question-index");
 const totalQuestionsSpan = getElement("#total-questions");
 
+const recapBody = getElement("#recap-body");
+
 // Init
 startBtn.addEventListener("click", startQuiz);
 nextBtn.addEventListener("click", nextQuestion);
@@ -70,6 +74,7 @@ function startQuiz() {
 
   currentQuestionIndex = 0;
   score = 0;
+  answersHistory = [];
 
   setText(totalQuestionsSpan, questions.length);
 
@@ -97,6 +102,7 @@ function showQuestion() {
     (timeLeft) => setText(timeLeftSpan, timeLeft),
     () => {
       lockAnswers(answersDiv);
+      recordAnswer(q, null);
       nextBtn.classList.remove("hidden");
     }
   );
@@ -115,7 +121,18 @@ function selectAnswer(index, btn) {
 
   markCorrectAnswer(answersDiv, q.correct);
   lockAnswers(answersDiv);
+  recordAnswer(q, index);
   nextBtn.classList.remove("hidden");
+}
+
+// Enregistre la réponse choisie (ou l'absence de réponse si timeout) pour le récapitulatif
+function recordAnswer(q, chosenIndex) {
+  answersHistory.push({
+    questionText: q.text,
+    chosenText: chosenIndex === null ? "Pas de réponse" : q.answers[chosenIndex],
+    correctText: q.answers[q.correct],
+    isCorrect: chosenIndex === q.correct,
+  });
 }
 
 function nextQuestion() {
@@ -138,6 +155,23 @@ function endQuiz() {
     saveToLocalStorage("bestScore", bestScore);
   }
   setText(bestScoreEnd, bestScore);
+
+  renderRecap();
+}
+
+// Affiche le tableau récapitulatif : réponse choisie vs bonne réponse pour chaque question
+function renderRecap() {
+  recapBody.innerHTML = "";
+  answersHistory.forEach((entry) => {
+    const row = document.createElement("tr");
+    row.classList.add(entry.isCorrect ? "recap-correct" : "recap-wrong");
+    row.innerHTML = `
+      <td>${entry.questionText}</td>
+      <td>${entry.chosenText}</td>
+      <td>${entry.correctText}</td>
+    `;
+    recapBody.appendChild(row);
+  });
 }
 
 function restartQuiz() {

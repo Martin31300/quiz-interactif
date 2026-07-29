@@ -89,3 +89,29 @@ button:hover {
   font-size: 1.2em;
   margin-bottom: 10px;
 }
+
+#recap-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  font-size: 0.9em;
+}
+
+#recap-table th,
+#recap-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+#recap-table th {
+  background-color: #eceff1;
+}
+
+#recap-table .recap-correct {
+  background-color: #c8e6c9;
+}
+
+#recap-table .recap-wrong {
+  background-color: #ffcdd2;
+}
