@@ -19,6 +19,7 @@ import {
 import { quizData } from "./data.js";
 import { initDarkMode, refreshDarkModeLabel } from "./theme.js";
 import { getLang, setLang, t, applyTranslations } from "./i18n.js";
+import { updateBadges } from "./badges.js";
 
 // Prépare une partie (les questions restent BILINGUES) :
 // - difficulté progressive : questions ordonnées de facile à difficile ;
@@ -63,6 +64,10 @@ console.log("Quiz JS loaded...");
 
 // Clé de sauvegarde du meilleur score, propre à chaque thème.
 const bestScoreKey = (theme) => `bestScore_${theme}`;
+
+// Clés des statistiques cumulées (toutes parties confondues), pour les badges.
+const TOTAL_CORRECT_KEY = "totalCorrectAnswers";
+const TOTAL_QUIZZES_KEY = "totalQuizzesCompleted";
 
 // Modes de jeu (Sprint 2) :
 // - normal    : minuteur par question + score
@@ -115,6 +120,7 @@ const hintBtn = getElement("#hint-btn");
 const hintText = getElement("#hint-text");
 
 const resultDetails = getElement("#result-details");
+const badgesList = getElement("#badges-list");
 const recapBody = getElement("#recap-body");
 const statsCorrect = getElement("#stats-correct");
 const statsWrong = getElement("#stats-wrong");
@@ -419,6 +425,48 @@ function endQuiz() {
   showElement(resultDetails);
   renderRecap();
   renderStats();
+  updateAndRenderBadges();
+}
+
+// Met à jour les statistiques cumulées (toutes parties confondues), calcule
+// les badges nouvellement débloqués, et les affiche.
+function updateAndRenderBadges() {
+  const totalCorrect = loadFromLocalStorage(TOTAL_CORRECT_KEY, 0) + score;
+  const totalQuizzes = loadFromLocalStorage(TOTAL_QUIZZES_KEY, 0) + 1;
+  saveToLocalStorage(TOTAL_CORRECT_KEY, totalCorrect);
+  saveToLocalStorage(TOTAL_QUIZZES_KEY, totalQuizzes);
+
+  const { allUnlocked, newlyUnlocked } = updateBadges({
+    totalCorrect,
+    totalQuizzes,
+    hasPerfect: score === questions.length,
+  });
+
+  renderBadges(allUnlocked, newlyUnlocked);
+}
+
+// Affiche la liste des badges débloqués ; ceux obtenus lors de cette
+// partie sont mis en évidence avec la classe "badge-new".
+function renderBadges(allUnlocked, newlyUnlocked) {
+  badgesList.innerHTML = "";
+
+  if (allUnlocked.length === 0) {
+    const li = document.createElement("li");
+    li.textContent = t("noBadges");
+    badgesList.appendChild(li);
+    return;
+  }
+
+  const newlyUnlockedIds = new Set(newlyUnlocked.map((badge) => badge.id));
+  allUnlocked.forEach((badge) => {
+    const li = document.createElement("li");
+    li.textContent = `${badge.icon} ${t(badge.labelKey)}`;
+    if (newlyUnlockedIds.has(badge.id)) {
+      li.classList.add("badge-new");
+      li.title = t("newBadge");
+    }
+    badgesList.appendChild(li);
+  });
 }
 
 function restartQuiz() {

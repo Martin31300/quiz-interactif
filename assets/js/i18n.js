@@ -40,6 +40,12 @@ const translations = {
     diff1: "🟢 Facile",
     diff2: "🟠 Moyen",
     diff3: "🔴 Difficile",
+    badgesTitle: "Badges débloqués",
+    badgeFirstQuiz: "Premier quiz terminé",
+    badgeTenCorrect: "10 bonnes réponses cumulées",
+    badgePerfect: "Score parfait sur un quiz",
+    noBadges: "Aucun badge débloqué pour l'instant",
+    newBadge: "Nouveau badge débloqué !",
   },
   en: {
     notice: "Test your knowledge with a few timed questions!",
@@ -74,6 +80,12 @@ const translations = {
     diff1: "🟢 Easy",
     diff2: "🟠 Medium",
     diff3: "🔴 Hard",
+    badgesTitle: "Unlocked badges",
+    badgeFirstQuiz: "Completed your first quiz",
+    badgeTenCorrect: "10 cumulative correct answers",
+    badgePerfect: "Perfect score on a quiz",
+    noBadges: "No badge unlocked yet",
+    newBadge: "New badge unlocked!",
   },
 };
 
