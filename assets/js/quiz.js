@@ -232,10 +232,16 @@ function showQuestion() {
   setText(difficultyBadge, difficultyLabel(q.difficulty));
 
   answersDiv.innerHTML = "";
-  q.answers.forEach((answer, index) => {
-    const btn = createAnswerButton(answer, () => selectAnswer(index, btn));
-    answersDiv.appendChild(btn);
-  });
+  if (currentMode === "flashcard") {
+    // Vraie flashcard : pas de QCM — question au recto, la réponse se
+    // révèle au clic (comme si on retournait la carte).
+    renderFlashcard(q);
+  } else {
+    q.answers.forEach((answer, index) => {
+      const btn = createAnswerButton(answer, () => selectAnswer(index, btn));
+      answersDiv.appendChild(btn);
+    });
+  }
 
   nextBtn.classList.add("hidden");
   setupHint(q);
@@ -261,6 +267,25 @@ function showQuestion() {
     hideElement(timerDiv);
     nextBtn.classList.remove("hidden");
   }
+}
+
+// Mode flashcard : affiche un bouton « Voir la réponse » qui révèle la
+// bonne réponse (le verso de la carte), puis se désactive.
+function renderFlashcard(q) {
+  const revealBtn = document.createElement("button");
+  revealBtn.className = "reveal-btn";
+  revealBtn.textContent = t("showAnswer");
+
+  const answerBox = document.createElement("p");
+  answerBox.className = "flashcard-answer hidden";
+  answerBox.textContent = q.answers[q.correct];
+
+  revealBtn.addEventListener("click", () => {
+    answerBox.classList.remove("hidden");
+    revealBtn.disabled = true;
+  });
+
+  answersDiv.append(revealBtn, answerBox);
 }
 
 // Indice par question : n'affiche le bouton que si un indice existe.

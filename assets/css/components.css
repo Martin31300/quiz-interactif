@@ -60,6 +60,24 @@
   border-color: #1976d2;
 }
 
+/* --- Mode flashcard : révéler la réponse (verso de la carte) --- */
+.reveal-btn {
+  display: block;
+  margin: 10px auto;
+  padding: 10px 18px;
+}
+
+.flashcard-answer {
+  max-width: 80%;
+  margin: 10px auto 0;
+  padding: 12px 16px;
+  background: #c8e6c9; /* vert clair, comme une bonne réponse */
+  border-radius: 6px;
+  color: #1b5e20;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
 /* --- Bouton et boîte d'indice (indice par question) --- */
 #hint-btn {
   background-color: #fff8e1;

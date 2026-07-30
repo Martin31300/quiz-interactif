@@ -89,3 +89,8 @@ body.dark-mode #lang-switcher select {
   color: #e0e0e0;
   border-color: #444;
 }
+
+body.dark-mode .flashcard-answer {
+  background: #1b3a1e;
+  color: #a5d6a7;
+}
