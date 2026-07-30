@@ -115,6 +115,7 @@ const hintBtn = getElement("#hint-btn");
 const hintText = getElement("#hint-text");
 
 const resultDetails = getElement("#result-details");
+const shareBtn = getElement("#share-btn");
 const recapBody = getElement("#recap-body");
 const statsCorrect = getElement("#stats-correct");
 const statsWrong = getElement("#stats-wrong");
@@ -125,6 +126,7 @@ startBtn.addEventListener("click", startQuiz);
 nextBtn.addEventListener("click", nextQuestion);
 restartBtn.addEventListener("click", restartQuiz);
 hintBtn.addEventListener("click", revealHint);
+shareBtn.addEventListener("click", shareScore);
 
 // Langue : restaure le choix, traduit l'interface, branche le menu.
 const langSelect = getElement("#lang-select");
@@ -398,7 +400,8 @@ function endQuiz() {
   hideElement(questionScreen);
   showElement(resultScreen);
 
-  // Flashcard : entraînement → pas de score, ni récap, ni statistiques.
+  // Flashcard : entraînement → pas de score, ni récap/stats, ni partage.
+  shareBtn.classList.toggle("hidden", currentMode === "flashcard");
   if (currentMode === "flashcard") {
     setText(scoreText, t("flashcardDone"));
     hideElement(resultBestLine);
@@ -419,6 +422,30 @@ function endQuiz() {
   showElement(resultDetails);
   renderRecap();
   renderStats();
+}
+
+// Partage du score : génère un lien contenant le score et utilise le
+// partage natif du navigateur (réseaux sociaux, messageries…) si disponible,
+// sinon copie le message + lien dans le presse-papiers.
+function shareScore() {
+  const url = new URL(window.location.href);
+  url.search = `?score=${score}&total=${questions.length}&theme=${currentTheme}`;
+
+  const message = t("shareMessage")
+    .replace("{score}", score)
+    .replace("{total}", questions.length)
+    .replace("{theme}", quizData[currentTheme].label[getLang()]);
+
+  if (navigator.share) {
+    navigator
+      .share({ title: "Quiz Dynamique", text: message, url: url.href })
+      .catch(() => {}); // partage annulé : rien à faire
+  } else {
+    navigator.clipboard.writeText(`${message} ${url.href}`).then(() => {
+      setText(shareBtn, t("shareCopied"));
+      setTimeout(() => setText(shareBtn, t("share")), 2000);
+    });
+  }
 }
 
 function restartQuiz() {
