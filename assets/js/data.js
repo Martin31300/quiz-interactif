@@ -69,6 +69,26 @@ export const quizData = {
       },
       {
         text: {
+          fr: "Quel est le drapeau de l'Italie ?",
+          en: "Which flag is Italy's?",
+        },
+        answers: {
+          fr: ["France", "Italie", "Allemagne", "Espagne"],
+          en: ["France", "Italy", "Germany", "Spain"],
+        },
+        // Réponses en images : tableau parallèle à answers (même ordre).
+        images: [
+          "../assets/img/flag-france.svg",
+          "../assets/img/flag-italie.svg",
+          "../assets/img/flag-allemagne.svg",
+          "../assets/img/flag-espagne.svg",
+        ],
+        correct: 1,
+        difficulty: 2,
+        timeLimit: 9,
+      },
+      {
+        text: {
           fr: "En quelle année a eu lieu la Révolution française ?",
           en: "In what year did the French Revolution take place?",
         },
@@ -120,6 +140,26 @@ export const quizData = {
           en: ["40", "42", "36", "48"],
         },
         correct: 1,
+        difficulty: 1,
+        timeLimit: 10,
+      },
+      {
+        text: {
+          fr: "Quelle figure possède 3 côtés ?",
+          en: "Which shape has 3 sides?",
+        },
+        answers: {
+          fr: ["Cercle", "Carré", "Triangle", "Étoile"],
+          en: ["Circle", "Square", "Triangle", "Star"],
+        },
+        // Réponses en images : tableau parallèle à answers (même ordre).
+        images: [
+          "../assets/img/forme-cercle.svg",
+          "../assets/img/forme-carre.svg",
+          "../assets/img/forme-triangle.svg",
+          "../assets/img/forme-etoile.svg",
+        ],
+        correct: 2,
         difficulty: 1,
         timeLimit: 10,
       },

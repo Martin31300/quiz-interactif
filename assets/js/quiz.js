@@ -5,6 +5,7 @@ import {
   hideElement,
   setText,
   createAnswerButton,
+  createImageAnswerButton,
   createThemeButton,
   setSelectedTheme,
   lockAnswers,
@@ -53,6 +54,8 @@ const difficultyLabel = (level) => t(`diff${level}`);
 const localizeQuestion = (q) => ({
   text: q.text[getLang()],
   answers: q.order.map((i) => q.answers[getLang()][i]),
+  // Les images suivent le même ordre mélangé que les réponses.
+  images: q.images ? q.order.map((i) => q.images[i]) : undefined,
   correct: q.correct,
   difficulty: q.difficulty,
   timeLimit: q.timeLimit,
@@ -247,6 +250,14 @@ function showQuestion() {
     // Vraie flashcard : pas de QCM — question au recto, la réponse se
     // révèle au clic (comme si on retournait la carte).
     renderFlashcard(q);
+  } else if (q.images) {
+    // Réponses basées sur des images : boutons-images cliquables.
+    q.answers.forEach((answer, index) => {
+      const btn = createImageAnswerButton(q.images[index], answer, () =>
+        selectAnswer(index, btn)
+      );
+      answersDiv.appendChild(btn);
+    });
   } else {
     q.answers.forEach((answer, index) => {
       const btn = createAnswerButton(answer, () => selectAnswer(index, btn));
@@ -292,7 +303,14 @@ function renderFlashcard(q) {
 
   const answerBox = document.createElement("p");
   answerBox.className = "flashcard-answer hidden";
-  answerBox.textContent = q.answers[q.correct];
+  if (q.images) {
+    // Question à images : le verso montre l'image de la bonne réponse.
+    const img = document.createElement("img");
+    img.src = q.images[q.correct];
+    img.alt = q.answers[q.correct];
+    answerBox.appendChild(img);
+  }
+  answerBox.appendChild(document.createTextNode(q.answers[q.correct]));
 
   revealBtn.addEventListener("click", () => {
     answerBox.classList.remove("hidden");
