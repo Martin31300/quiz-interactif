@@ -11,6 +11,19 @@ export const createAnswerButton = (text, onClick) => {
   return btn;
 };
 
+// Bouton de réponse en image (Sprint 2 : réponses basées sur des images).
+// L'attribut alt garde le texte de la réponse pour l'accessibilité.
+export const createImageAnswerButton = (src, alt, onClick) => {
+  const btn = document.createElement("button");
+  btn.className = "img-answer";
+  const img = document.createElement("img");
+  img.src = src;
+  img.alt = alt;
+  btn.appendChild(img);
+  btn.addEventListener("click", onClick);
+  return btn;
+};
+
 // Bouton de sélection d'un thème (Sprint 2 : mode multi-thème).
 export const createThemeButton = (label, onClick) => {
   const btn = document.createElement("button");
