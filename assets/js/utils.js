@@ -1,7 +1,15 @@
 // utils.js
 export const loadFromLocalStorage = (key, defaultValue) => {
   const storedValue = localStorage.getItem(key);
-  return storedValue ? JSON.parse(storedValue) : defaultValue;
+  if (storedValue === null) return defaultValue;
+  try {
+    return JSON.parse(storedValue);
+  } catch {
+    // Valeur corrompue (ex. chaîne brute non-JSON) : on repart sur la
+    // valeur par défaut au lieu de faire planter toute l'application.
+    localStorage.removeItem(key);
+    return defaultValue;
+  }
 };
 
 export const saveToLocalStorage = (key, value) => {
