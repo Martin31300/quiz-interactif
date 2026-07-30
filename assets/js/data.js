@@ -16,6 +16,10 @@ export const quizData = {
           fr: ["Marseille", "Paris", "Lyon", "Bordeaux"],
           en: ["Marseille", "Paris", "Lyon", "Bordeaux"],
         },
+        audio: {
+          fr: "../assets/audio/culture-1.fr.m4a",
+          en: "../assets/audio/culture-1.en.m4a",
+        },
         correct: 1,
         difficulty: 1,
         timeLimit: 12,
@@ -69,6 +73,26 @@ export const quizData = {
       },
       {
         text: {
+          fr: "Quel est le drapeau de l'Italie ?",
+          en: "Which flag is Italy's?",
+        },
+        answers: {
+          fr: ["France", "Italie", "Allemagne", "Espagne"],
+          en: ["France", "Italy", "Germany", "Spain"],
+        },
+        // Réponses en images : tableau parallèle à answers (même ordre).
+        images: [
+          "../assets/img/flag-france.svg",
+          "../assets/img/flag-italie.svg",
+          "../assets/img/flag-allemagne.svg",
+          "../assets/img/flag-espagne.svg",
+        ],
+        correct: 1,
+        difficulty: 2,
+        timeLimit: 9,
+      },
+      {
+        text: {
           fr: "En quelle année a eu lieu la Révolution française ?",
           en: "In what year did the French Revolution take place?",
         },
@@ -84,6 +108,100 @@ export const quizData = {
           en: "Storming of the Bastille: late 18th century.",
         },
       },
+      {
+        text: {
+          fr: "Combien de continents y a-t-il sur Terre ?",
+          en: "How many continents are there on Earth?",
+        },
+        answers: {
+          fr: ["5", "6", "7", "8"],
+          en: ["5", "6", "7", "8"],
+        },
+        correct: 2,
+        difficulty: 1,
+        timeLimit: 12,
+      },
+      {
+        text: {
+          fr: "Quel animal est surnommé le roi de la savane ?",
+          en: "Which animal is called the king of the savanna?",
+        },
+        answers: {
+          fr: ["L'éléphant", "Le lion", "Le tigre", "La girafe"],
+          en: ["The elephant", "The lion", "The tiger", "The giraffe"],
+        },
+        correct: 1,
+        difficulty: 1,
+        timeLimit: 12,
+      },
+      {
+        text: {
+          fr: "Quel pays a pour capitale Tokyo ?",
+          en: "Which country has Tokyo as its capital?",
+        },
+        answers: {
+          fr: ["La Chine", "Le Japon", "La Corée du Sud", "La Thaïlande"],
+          en: ["China", "Japan", "South Korea", "Thailand"],
+        },
+        correct: 1,
+        difficulty: 2,
+        timeLimit: 9,
+        hint: {
+          fr: "Le pays du soleil levant.",
+          en: "The land of the rising sun.",
+        },
+      },
+      {
+        text: {
+          fr: "Combien de joueurs d'une équipe de football sont sur le terrain ?",
+          en: "How many players of a football team are on the pitch?",
+        },
+        answers: {
+          fr: ["9", "10", "11", "12"],
+          en: ["9", "10", "11", "12"],
+        },
+        correct: 2,
+        difficulty: 2,
+        timeLimit: 9,
+        hint: {
+          fr: "Dix joueurs de champ… plus le gardien.",
+          en: "Ten outfield players… plus the goalkeeper.",
+        },
+      },
+      {
+        text: {
+          fr: "Qui a écrit « Les Misérables » ?",
+          en: "Who wrote “Les Misérables”?",
+        },
+        answers: {
+          fr: ["Émile Zola", "Victor Hugo", "Molière", "Balzac"],
+          en: ["Émile Zola", "Victor Hugo", "Molière", "Balzac"],
+        },
+        correct: 1,
+        difficulty: 3,
+        timeLimit: 6,
+        hint: {
+          fr: "Aussi l'auteur de Notre-Dame de Paris.",
+          en: "Also the author of The Hunchback of Notre-Dame.",
+        },
+      },
+      {
+        text: {
+          fr: "En quelle année l'Homme a-t-il marché sur la Lune ?",
+          en: "In what year did humans walk on the Moon?",
+        },
+        answers: {
+          fr: ["1959", "1965", "1969", "1972"],
+          en: ["1959", "1965", "1969", "1972"],
+        },
+        correct: 2,
+        difficulty: 3,
+        timeLimit: 6,
+        hint: {
+          fr: "Apollo 11, à la fin des années 60.",
+          en: "Apollo 11, in the late sixties.",
+        },
+      },
     ],
   },
 
@@ -95,6 +213,10 @@ export const quizData = {
         answers: {
           fr: ["3", "4", "5", "1"],
           en: ["3", "4", "5", "1"],
+        },
+        audio: {
+          fr: "../assets/audio/maths-1.fr.m4a",
+          en: "../assets/audio/maths-1.en.m4a",
         },
         correct: 2,
         difficulty: 1,
@@ -120,6 +242,26 @@ export const quizData = {
           en: ["40", "42", "36", "48"],
         },
         correct: 1,
+        difficulty: 1,
+        timeLimit: 10,
+      },
+      {
+        text: {
+          fr: "Quelle figure possède 3 côtés ?",
+          en: "Which shape has 3 sides?",
+        },
+        answers: {
+          fr: ["Cercle", "Carré", "Triangle", "Étoile"],
+          en: ["Circle", "Square", "Triangle", "Star"],
+        },
+        // Réponses en images : tableau parallèle à answers (même ordre).
+        images: [
+          "../assets/img/forme-cercle.svg",
+          "../assets/img/forme-carre.svg",
+          "../assets/img/forme-triangle.svg",
+          "../assets/img/forme-etoile.svg",
+        ],
+        correct: 2,
         difficulty: 1,
         timeLimit: 10,
       },
@@ -171,6 +313,94 @@ export const quizData = {
           en: "10% of 200 = 20, add half of 20.",
         },
       },
+      {
+        text: { fr: "Combien font 9 + 6 ?", en: "What is 9 + 6?" },
+        answers: {
+          fr: ["14", "15", "16", "13"],
+          en: ["14", "15", "16", "13"],
+        },
+        correct: 1,
+        difficulty: 1,
+        timeLimit: 10,
+      },
+      {
+        text: {
+          fr: "Combien de minutes y a-t-il dans une heure ?",
+          en: "How many minutes are there in an hour?",
+        },
+        answers: {
+          fr: ["60", "100", "90", "30"],
+          en: ["60", "100", "90", "30"],
+        },
+        correct: 0,
+        difficulty: 1,
+        timeLimit: 10,
+      },
+      {
+        text: { fr: "Combien font 12 × 12 ?", en: "What is 12 × 12?" },
+        answers: {
+          fr: ["124", "144", "134", "154"],
+          en: ["124", "144", "134", "154"],
+        },
+        correct: 1,
+        difficulty: 2,
+        timeLimit: 8,
+        hint: {
+          fr: "Une douzaine de douzaines.",
+          en: "A dozen dozens.",
+        },
+      },
+      {
+        text: {
+          fr: "Lequel de ces nombres est un nombre premier ?",
+          en: "Which of these numbers is a prime number?",
+        },
+        answers: {
+          fr: ["9", "15", "13", "21"],
+          en: ["9", "15", "13", "21"],
+        },
+        correct: 2,
+        difficulty: 2,
+        timeLimit: 8,
+        hint: {
+          fr: "Il n'est divisible que par 1 et par lui-même.",
+          en: "It is only divisible by 1 and itself.",
+        },
+      },
+      {
+        text: {
+          fr: "Combien font 2 puissance 5 ?",
+          en: "What is 2 to the power of 5?",
+        },
+        answers: {
+          fr: ["16", "32", "64", "25"],
+          en: ["16", "32", "64", "25"],
+        },
+        correct: 1,
+        difficulty: 3,
+        timeLimit: 6,
+        hint: {
+          fr: "2 × 2 × 2 × 2 × 2.",
+          en: "2 × 2 × 2 × 2 × 2.",
+        },
+      },
+      {
+        text: {
+          fr: "Quelle est la moitié de 3/4 ?",
+          en: "What is half of 3/4?",
+        },
+        answers: {
+          fr: ["1/4", "3/8", "1/2", "2/3"],
+          en: ["1/4", "3/8", "1/2", "2/3"],
+        },
+        correct: 1,
+        difficulty: 3,
+        timeLimit: 6,
+        hint: {
+          fr: "Divise 3/4 par 2 : le dénominateur double.",
+          en: "Divide 3/4 by 2: the denominator doubles.",
+        },
+      },
     ],
   },
 
@@ -185,6 +415,10 @@ export const quizData = {
         answers: {
           fr: ["Python", "HTML", "C++", "SQL"],
           en: ["Python", "HTML", "C++", "SQL"],
+        },
+        audio: {
+          fr: "../assets/audio/web-1.fr.m4a",
+          en: "../assets/audio/web-1.en.m4a",
         },
         correct: 1,
         difficulty: 1,
@@ -259,6 +493,120 @@ export const quizData = {
         hint: {
           fr: "Elle contient les mots « add », « Event » et « Listener ».",
           en: 'It contains the words "add", "Event" and "Listener".',
+        },
+      },
+      {
+        text: {
+          fr: "Que signifie « www » ?",
+          en: "What does “www” stand for?",
+        },
+        answers: {
+          fr: [
+            "World Wide Web",
+            "Web World Wide",
+            "Wide Web World",
+            "World Web Wide",
+          ],
+          en: [
+            "World Wide Web",
+            "Web World Wide",
+            "Wide Web World",
+            "World Web Wide",
+          ],
+        },
+        correct: 0,
+        difficulty: 1,
+        timeLimit: 12,
+      },
+      {
+        text: {
+          fr: "Quelle balise crée un lien en HTML ?",
+          en: "Which tag creates a link in HTML?",
+        },
+        answers: {
+          fr: ["<link>", "<a>", "<href>", "<url>"],
+          en: ["<link>", "<a>", "<href>", "<url>"],
+        },
+        correct: 1,
+        difficulty: 1,
+        timeLimit: 12,
+      },
+      {
+        text: {
+          fr: "Quel protocole sécurise les échanges sur le web ?",
+          en: "Which protocol secures exchanges on the web?",
+        },
+        answers: {
+          fr: ["HTTP", "FTP", "HTTPS", "SMTP"],
+          en: ["HTTP", "FTP", "HTTPS", "SMTP"],
+        },
+        correct: 2,
+        difficulty: 2,
+        timeLimit: 9,
+        hint: {
+          fr: "Son « S » final signifie « Secure ».",
+          en: 'Its final "S" stands for "Secure".',
+        },
+      },
+      {
+        text: {
+          fr: "Que renvoie typeof [] en JavaScript ?",
+          en: "What does typeof [] return in JavaScript?",
+        },
+        answers: {
+          fr: ['"array"', '"object"', '"list"', '"undefined"'],
+          en: ['"array"', '"object"', '"list"', '"undefined"'],
+        },
+        correct: 1,
+        difficulty: 2,
+        timeLimit: 9,
+        hint: {
+          fr: "En JS, les tableaux sont un type… d'objet.",
+          en: "In JS, arrays are a kind of… object.",
+        },
+      },
+      {
+        text: {
+          fr: "Quelle méthode transforme un texte JSON en objet JS ?",
+          en: "Which method turns JSON text into a JS object?",
+        },
+        answers: {
+          fr: [
+            "JSON.parse()",
+            "JSON.stringify()",
+            "JSON.toObject()",
+            "JSON.decode()",
+          ],
+          en: [
+            "JSON.parse()",
+            "JSON.stringify()",
+            "JSON.toObject()",
+            "JSON.decode()",
+          ],
+        },
+        correct: 0,
+        difficulty: 3,
+        timeLimit: 6,
+        hint: {
+          fr: "C'est l'inverse de stringify.",
+          en: "It is the opposite of stringify.",
+        },
+      },
+      {
+        text: {
+          fr: "Quel code HTTP signifie « Not Found » ?",
+          en: "Which HTTP status code means “Not Found”?",
+        },
+        answers: {
+          fr: ["200", "301", "404", "500"],
+          en: ["200", "301", "404", "500"],
+        },
+        correct: 2,
+        difficulty: 3,
+        timeLimit: 6,
+        hint: {
+          fr: "Le plus célèbre des codes d'erreur du web.",
+          en: "The most famous web error code.",
         },
       },
     ],

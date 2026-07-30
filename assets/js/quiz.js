@@ -5,6 +5,7 @@ import {
   hideElement,
   setText,
   createAnswerButton,
+  createImageAnswerButton,
   createThemeButton,
   setSelectedTheme,
   lockAnswers,
@@ -19,6 +20,7 @@ import {
 import { quizData } from "./data.js";
 import { initDarkMode, refreshDarkModeLabel } from "./theme.js";
 import { getLang, setLang, t, applyTranslations } from "./i18n.js";
+import { updateBadges } from "./badges.js";
 
 // Prépare une partie (les questions restent BILINGUES) :
 // - difficulté progressive : questions ordonnées de facile à difficile ;
@@ -26,6 +28,12 @@ import { getLang, setLang, t, applyTranslations } from "./i18n.js";
 //   réponses (`order`, permutation d'indices) tiré une fois par question.
 // La langue n'est PAS résolue ici mais à l'affichage — ainsi, changer de
 // langue en cours de partie retraduit la question courante.
+// Prépare une seule question : tire un ordre de réponses aléatoire.
+const prepareOne = (q) => {
+  const order = shuffle(q.answers.fr.map((_, i) => i));
+  return { ...q, order, correct: order.indexOf(q.correct) };
+};
+
 const prepareQuestions = (source) => {
   const byLevel = new Map();
   source.forEach((q) => {
@@ -38,11 +46,13 @@ const prepareQuestions = (source) => {
   const ordered = [];
   levels.forEach((level) => shuffle(byLevel.get(level)).forEach((q) => ordered.push(q)));
 
-  return ordered.map((q) => {
-    const order = shuffle(q.answers.fr.map((_, i) => i)); // ordre des réponses
-    return { ...q, order, correct: order.indexOf(q.correct) };
-  });
+  return ordered.map(prepareOne);
 };
+
+// Tire une question au hasard dans la banque (mode infini : pioche avec
+// répétitions possibles, il n'y a pas de limite de questions).
+const pickRandomQuestion = (source) =>
+  prepareOne(source[Math.floor(Math.random() * source.length)]);
 
 // Libellé traduit d'un niveau de difficulté (🟢/🟠/🔴).
 const difficultyLabel = (level) => t(`diff${level}`);
@@ -53,10 +63,13 @@ const difficultyLabel = (level) => t(`diff${level}`);
 const localizeQuestion = (q) => ({
   text: q.text[getLang()],
   answers: q.order.map((i) => q.answers[getLang()][i]),
+  // Les images suivent le même ordre mélangé que les réponses.
+  images: q.images ? q.order.map((i) => q.images[i]) : undefined,
   correct: q.correct,
   difficulty: q.difficulty,
   timeLimit: q.timeLimit,
   hint: q.hint ? q.hint[getLang()] : undefined,
+  audio: q.audio ? q.audio[getLang()] : undefined,
 });
 
 console.log("Quiz JS loaded...");
@@ -64,14 +77,20 @@ console.log("Quiz JS loaded...");
 // Clé de sauvegarde du meilleur score, propre à chaque thème.
 const bestScoreKey = (theme) => `bestScore_${theme}`;
 
+// Clés des statistiques cumulées (toutes parties confondues), pour les badges.
+const TOTAL_CORRECT_KEY = "totalCorrectAnswers";
+const TOTAL_QUIZZES_KEY = "totalQuizzesCompleted";
+
 // Modes de jeu (Sprint 2) :
 // - normal    : minuteur par question + score
 // - chrono    : minuteur GLOBAL unique pour tout le quiz + score
 // - flashcard : entraînement, sans minuteur ni score
+// - infinite  : questions aléatoires sans limite, le joueur arrête quand il veut
 const MODES = [
   { key: "normal", labelKey: "modeNormal" },
   { key: "chrono", labelKey: "modeChrono" },
   { key: "flashcard", labelKey: "modeFlashcard" },
+  { key: "infinite", labelKey: "modeInfinite" },
 ];
 const CHRONO_SECONDS = 30; // temps global du mode contre-la-montre
 
@@ -85,6 +104,7 @@ let timerId = null; // minuteur par question (mode normal)
 let globalTimerId = null; // minuteur global (mode chrono)
 let answersHistory = []; // historique des réponses (récap + statistiques)
 let questionStartTime = null; // horodatage d'affichage (temps de réponse)
+let currentAudio = null; // lecture audio de la question en cours
 
 // DOM Elements
 const introScreen = getElement("#intro-screen");
@@ -103,6 +123,7 @@ const answersDiv = getElement("#answers");
 const nextBtn = getElement("#next-btn");
 const startBtn = getElement("#start-btn");
 const restartBtn = getElement("#restart-btn");
+const endInfiniteBtn = getElement("#end-infinite-btn");
 
 const scoreText = getElement("#score-text");
 const timeLeftSpan = getElement("#time-left");
@@ -113,8 +134,11 @@ const difficultyBadge = getElement("#difficulty-badge");
 
 const hintBtn = getElement("#hint-btn");
 const hintText = getElement("#hint-text");
+const audioBtn = getElement("#audio-btn");
 
 const resultDetails = getElement("#result-details");
+const shareBtn = getElement("#share-btn");
+const badgesList = getElement("#badges-list");
 const recapBody = getElement("#recap-body");
 const statsCorrect = getElement("#stats-correct");
 const statsWrong = getElement("#stats-wrong");
@@ -125,6 +149,9 @@ startBtn.addEventListener("click", startQuiz);
 nextBtn.addEventListener("click", nextQuestion);
 restartBtn.addEventListener("click", restartQuiz);
 hintBtn.addEventListener("click", revealHint);
+audioBtn.addEventListener("click", playQuestionAudio);
+shareBtn.addEventListener("click", shareScore);
+endInfiniteBtn.addEventListener("click", endQuiz);
 
 // Langue : restaure le choix, traduit l'interface, branche le menu.
 const langSelect = getElement("#lang-select");
@@ -207,7 +234,13 @@ function highlightMode() {
 function startQuiz() {
   if (!currentTheme) return; // aucun thème choisi
 
-  questions = prepareQuestions(quizData[currentTheme].questions);
+  if (currentMode === "infinite") {
+    // Mode infini : on part avec une seule question tirée au hasard,
+    // les suivantes seront piochées à la volée dans nextQuestion().
+    questions = [pickRandomQuestion(quizData[currentTheme].questions)];
+  } else {
+    questions = prepareQuestions(quizData[currentTheme].questions);
+  }
 
   hideElement(introScreen);
   showElement(questionScreen);
@@ -216,7 +249,12 @@ function startQuiz() {
   score = 0;
   answersHistory = [];
 
-  setText(totalQuestionsSpan, questions.length);
+  setText(totalQuestionsSpan, currentMode === "infinite" ? "∞" : questions.length);
+  if (currentMode === "infinite") {
+    showElement(endInfiniteBtn);
+  } else {
+    hideElement(endInfiniteBtn);
+  }
 
   // Mode contre-la-montre : un seul minuteur global pour tout le quiz.
   clearInterval(globalTimerId);
@@ -234,6 +272,7 @@ function startQuiz() {
 
 function showQuestion() {
   clearInterval(timerId);
+  stopAudio();
 
   const q = localizeQuestion(questions[currentQuestionIndex]);
   setText(questionText, q.text);
@@ -245,6 +284,14 @@ function showQuestion() {
     // Vraie flashcard : pas de QCM — question au recto, la réponse se
     // révèle au clic (comme si on retournait la carte).
     renderFlashcard(q);
+  } else if (q.images) {
+    // Réponses basées sur des images : boutons-images cliquables.
+    q.answers.forEach((answer, index) => {
+      const btn = createImageAnswerButton(q.images[index], answer, () =>
+        selectAnswer(index, btn)
+      );
+      answersDiv.appendChild(btn);
+    });
   } else {
     q.answers.forEach((answer, index) => {
       const btn = createAnswerButton(answer, () => selectAnswer(index, btn));
@@ -254,11 +301,12 @@ function showQuestion() {
 
   nextBtn.classList.add("hidden");
   setupHint(q);
+  setupAudio(q);
 
   questionStartTime = Date.now(); // pour le temps de réponse (statistiques)
 
-  if (currentMode === "normal") {
-    // Minuteur par question.
+  if (currentMode === "normal" || currentMode === "infinite") {
+    // Minuteur par question (aussi utilisé en mode infini).
     showElement(timerDiv);
     timeLeftSpan.textContent = q.timeLimit;
     timerId = startTimer(
@@ -290,7 +338,14 @@ function renderFlashcard(q) {
 
   const answerBox = document.createElement("p");
   answerBox.className = "flashcard-answer hidden";
-  answerBox.textContent = q.answers[q.correct];
+  if (q.images) {
+    // Question à images : le verso montre l'image de la bonne réponse.
+    const img = document.createElement("img");
+    img.src = q.images[q.correct];
+    img.alt = q.answers[q.correct];
+    answerBox.appendChild(img);
+  }
+  answerBox.appendChild(document.createTextNode(q.answers[q.correct]));
 
   revealBtn.addEventListener("click", () => {
     answerBox.classList.remove("hidden");
@@ -319,6 +374,29 @@ function revealHint() {
   setText(hintText, `💡 ${q.hint[getLang()]}`);
   hintText.classList.remove("hidden");
   hintBtn.disabled = true;
+}
+
+// Audio par question : n'affiche le bouton "Lecture" que si un fichier
+// audio existe pour la question courante (même principe que l'indice).
+function setupAudio(q) {
+  audioBtn.classList.toggle("hidden", !q.audio);
+}
+
+// Joue le fichier audio associé à la question courante.
+function playQuestionAudio() {
+  const q = localizeQuestion(questions[currentQuestionIndex]);
+  if (!q.audio) return;
+  stopAudio();
+  currentAudio = new Audio(q.audio);
+  currentAudio.play();
+}
+
+// Coupe la lecture en cours (changement de question, fin de partie...).
+function stopAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
 }
 
 function selectAnswer(index, btn) {
@@ -383,6 +461,15 @@ function renderStats() {
 }
 
 function nextQuestion() {
+  if (currentMode === "infinite") {
+    // Pas de fin naturelle : on pioche une nouvelle question et on continue,
+    // jusqu'à ce que le joueur clique sur "Terminer le quiz".
+    questions.push(pickRandomQuestion(quizData[currentTheme].questions));
+    currentQuestionIndex++;
+    showQuestion();
+    return;
+  }
+
   currentQuestionIndex++;
   if (currentQuestionIndex < questions.length) {
     showQuestion();
@@ -394,11 +481,13 @@ function nextQuestion() {
 function endQuiz() {
   clearInterval(timerId);
   clearInterval(globalTimerId);
+  stopAudio();
 
   hideElement(questionScreen);
   showElement(resultScreen);
 
-  // Flashcard : entraînement → pas de score, ni récap, ni statistiques.
+  // Flashcard : entraînement → pas de score, ni récap/stats, ni partage.
+  shareBtn.classList.toggle("hidden", currentMode === "flashcard");
   if (currentMode === "flashcard") {
     setText(scoreText, t("flashcardDone"));
     hideElement(resultBestLine);
@@ -419,11 +508,78 @@ function endQuiz() {
   showElement(resultDetails);
   renderRecap();
   renderStats();
+  updateAndRenderBadges();
+}
+
+// Met à jour les statistiques cumulées (toutes parties confondues), calcule
+// les badges nouvellement débloqués, et les affiche.
+function updateAndRenderBadges() {
+  const totalCorrect = loadFromLocalStorage(TOTAL_CORRECT_KEY, 0) + score;
+  const totalQuizzes = loadFromLocalStorage(TOTAL_QUIZZES_KEY, 0) + 1;
+  saveToLocalStorage(TOTAL_CORRECT_KEY, totalCorrect);
+  saveToLocalStorage(TOTAL_QUIZZES_KEY, totalQuizzes);
+
+  const { allUnlocked, newlyUnlocked } = updateBadges({
+    totalCorrect,
+    totalQuizzes,
+    hasPerfect: score === questions.length,
+  });
+
+  renderBadges(allUnlocked, newlyUnlocked);
+}
+
+// Affiche la liste des badges débloqués ; ceux obtenus lors de cette
+// partie sont mis en évidence avec la classe "badge-new".
+function renderBadges(allUnlocked, newlyUnlocked) {
+  badgesList.innerHTML = "";
+
+  if (allUnlocked.length === 0) {
+    const li = document.createElement("li");
+    li.textContent = t("noBadges");
+    badgesList.appendChild(li);
+    return;
+  }
+
+  const newlyUnlockedIds = new Set(newlyUnlocked.map((badge) => badge.id));
+  allUnlocked.forEach((badge) => {
+    const li = document.createElement("li");
+    li.textContent = `${badge.icon} ${t(badge.labelKey)}`;
+    if (newlyUnlockedIds.has(badge.id)) {
+      li.classList.add("badge-new");
+      li.title = t("newBadge");
+    }
+    badgesList.appendChild(li);
+  });
+}
+
+// Partage du score : génère un lien contenant le score et utilise le
+// partage natif du navigateur (réseaux sociaux, messageries…) si disponible,
+// sinon copie le message + lien dans le presse-papiers.
+function shareScore() {
+  const url = new URL(window.location.href);
+  url.search = `?score=${score}&total=${questions.length}&theme=${currentTheme}`;
+
+  const message = t("shareMessage")
+    .replace("{score}", score)
+    .replace("{total}", questions.length)
+    .replace("{theme}", quizData[currentTheme].label[getLang()]);
+
+  if (navigator.share) {
+    navigator
+      .share({ title: "Quiz Dynamique", text: message, url: url.href })
+      .catch(() => {}); // partage annulé : rien à faire
+  } else {
+    navigator.clipboard.writeText(`${message} ${url.href}`).then(() => {
+      setText(shareBtn, t("shareCopied"));
+      setTimeout(() => setText(shareBtn, t("share")), 2000);
+    });
+  }
 }
 
 function restartQuiz() {
   clearInterval(timerId);
   clearInterval(globalTimerId);
+  stopAudio();
 
   hideElement(resultScreen);
   showElement(introScreen);
