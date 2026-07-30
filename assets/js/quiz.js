@@ -27,6 +27,12 @@ import { updateBadges } from "./badges.js";
 //   réponses (`order`, permutation d'indices) tiré une fois par question.
 // La langue n'est PAS résolue ici mais à l'affichage — ainsi, changer de
 // langue en cours de partie retraduit la question courante.
+// Prépare une seule question : tire un ordre de réponses aléatoire.
+const prepareOne = (q) => {
+  const order = shuffle(q.answers.fr.map((_, i) => i));
+  return { ...q, order, correct: order.indexOf(q.correct) };
+};
+
 const prepareQuestions = (source) => {
   const byLevel = new Map();
   source.forEach((q) => {
@@ -39,11 +45,13 @@ const prepareQuestions = (source) => {
   const ordered = [];
   levels.forEach((level) => shuffle(byLevel.get(level)).forEach((q) => ordered.push(q)));
 
-  return ordered.map((q) => {
-    const order = shuffle(q.answers.fr.map((_, i) => i)); // ordre des réponses
-    return { ...q, order, correct: order.indexOf(q.correct) };
-  });
+  return ordered.map(prepareOne);
 };
+
+// Tire une question au hasard dans la banque (mode infini : pioche avec
+// répétitions possibles, il n'y a pas de limite de questions).
+const pickRandomQuestion = (source) =>
+  prepareOne(source[Math.floor(Math.random() * source.length)]);
 
 // Libellé traduit d'un niveau de difficulté (🟢/🟠/🔴).
 const difficultyLabel = (level) => t(`diff${level}`);
@@ -73,10 +81,12 @@ const TOTAL_QUIZZES_KEY = "totalQuizzesCompleted";
 // - normal    : minuteur par question + score
 // - chrono    : minuteur GLOBAL unique pour tout le quiz + score
 // - flashcard : entraînement, sans minuteur ni score
+// - infinite  : questions aléatoires sans limite, le joueur arrête quand il veut
 const MODES = [
   { key: "normal", labelKey: "modeNormal" },
   { key: "chrono", labelKey: "modeChrono" },
   { key: "flashcard", labelKey: "modeFlashcard" },
+  { key: "infinite", labelKey: "modeInfinite" },
 ];
 const CHRONO_SECONDS = 30; // temps global du mode contre-la-montre
 
@@ -108,6 +118,7 @@ const answersDiv = getElement("#answers");
 const nextBtn = getElement("#next-btn");
 const startBtn = getElement("#start-btn");
 const restartBtn = getElement("#restart-btn");
+const endInfiniteBtn = getElement("#end-infinite-btn");
 
 const scoreText = getElement("#score-text");
 const timeLeftSpan = getElement("#time-left");
@@ -131,6 +142,7 @@ startBtn.addEventListener("click", startQuiz);
 nextBtn.addEventListener("click", nextQuestion);
 restartBtn.addEventListener("click", restartQuiz);
 hintBtn.addEventListener("click", revealHint);
+endInfiniteBtn.addEventListener("click", endQuiz);
 
 // Langue : restaure le choix, traduit l'interface, branche le menu.
 const langSelect = getElement("#lang-select");
@@ -213,7 +225,13 @@ function highlightMode() {
 function startQuiz() {
   if (!currentTheme) return; // aucun thème choisi
 
-  questions = prepareQuestions(quizData[currentTheme].questions);
+  if (currentMode === "infinite") {
+    // Mode infini : on part avec une seule question tirée au hasard,
+    // les suivantes seront piochées à la volée dans nextQuestion().
+    questions = [pickRandomQuestion(quizData[currentTheme].questions)];
+  } else {
+    questions = prepareQuestions(quizData[currentTheme].questions);
+  }
 
   hideElement(introScreen);
   showElement(questionScreen);
@@ -222,7 +240,12 @@ function startQuiz() {
   score = 0;
   answersHistory = [];
 
-  setText(totalQuestionsSpan, questions.length);
+  setText(totalQuestionsSpan, currentMode === "infinite" ? "∞" : questions.length);
+  if (currentMode === "infinite") {
+    showElement(endInfiniteBtn);
+  } else {
+    hideElement(endInfiniteBtn);
+  }
 
   // Mode contre-la-montre : un seul minuteur global pour tout le quiz.
   clearInterval(globalTimerId);
@@ -263,8 +286,8 @@ function showQuestion() {
 
   questionStartTime = Date.now(); // pour le temps de réponse (statistiques)
 
-  if (currentMode === "normal") {
-    // Minuteur par question.
+  if (currentMode === "normal" || currentMode === "infinite") {
+    // Minuteur par question (aussi utilisé en mode infini).
     showElement(timerDiv);
     timeLeftSpan.textContent = q.timeLimit;
     timerId = startTimer(
@@ -389,6 +412,15 @@ function renderStats() {
 }
 
 function nextQuestion() {
+  if (currentMode === "infinite") {
+    // Pas de fin naturelle : on pioche une nouvelle question et on continue,
+    // jusqu'à ce que le joueur clique sur "Terminer le quiz".
+    questions.push(pickRandomQuestion(quizData[currentTheme].questions));
+    currentQuestionIndex++;
+    showQuestion();
+    return;
+  }
+
   currentQuestionIndex++;
   if (currentQuestionIndex < questions.length) {
     showQuestion();
