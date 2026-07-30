@@ -16,6 +16,10 @@ export const quizData = {
           fr: ["Marseille", "Paris", "Lyon", "Bordeaux"],
           en: ["Marseille", "Paris", "Lyon", "Bordeaux"],
         },
+        audio: {
+          fr: "../assets/audio/culture-1.fr.m4a",
+          en: "../assets/audio/culture-1.en.m4a",
+        },
         correct: 1,
         difficulty: 1,
         timeLimit: 12,
@@ -209,6 +213,10 @@ export const quizData = {
         answers: {
           fr: ["3", "4", "5", "1"],
           en: ["3", "4", "5", "1"],
+        },
+        audio: {
+          fr: "../assets/audio/maths-1.fr.m4a",
+          en: "../assets/audio/maths-1.en.m4a",
         },
         correct: 2,
         difficulty: 1,
@@ -407,6 +415,10 @@ export const quizData = {
         answers: {
           fr: ["Python", "HTML", "C++", "SQL"],
           en: ["Python", "HTML", "C++", "SQL"],
+        },
+        audio: {
+          fr: "../assets/audio/web-1.fr.m4a",
+          en: "../assets/audio/web-1.en.m4a",
         },
         correct: 1,
         difficulty: 1,

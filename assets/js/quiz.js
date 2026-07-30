@@ -69,6 +69,7 @@ const localizeQuestion = (q) => ({
   difficulty: q.difficulty,
   timeLimit: q.timeLimit,
   hint: q.hint ? q.hint[getLang()] : undefined,
+  audio: q.audio ? q.audio[getLang()] : undefined,
 });
 
 console.log("Quiz JS loaded...");
@@ -103,6 +104,7 @@ let timerId = null; // minuteur par question (mode normal)
 let globalTimerId = null; // minuteur global (mode chrono)
 let answersHistory = []; // historique des réponses (récap + statistiques)
 let questionStartTime = null; // horodatage d'affichage (temps de réponse)
+let currentAudio = null; // lecture audio de la question en cours
 
 // DOM Elements
 const introScreen = getElement("#intro-screen");
@@ -132,6 +134,7 @@ const difficultyBadge = getElement("#difficulty-badge");
 
 const hintBtn = getElement("#hint-btn");
 const hintText = getElement("#hint-text");
+const audioBtn = getElement("#audio-btn");
 
 const resultDetails = getElement("#result-details");
 const shareBtn = getElement("#share-btn");
@@ -146,6 +149,7 @@ startBtn.addEventListener("click", startQuiz);
 nextBtn.addEventListener("click", nextQuestion);
 restartBtn.addEventListener("click", restartQuiz);
 hintBtn.addEventListener("click", revealHint);
+audioBtn.addEventListener("click", playQuestionAudio);
 shareBtn.addEventListener("click", shareScore);
 endInfiniteBtn.addEventListener("click", endQuiz);
 
@@ -268,6 +272,7 @@ function startQuiz() {
 
 function showQuestion() {
   clearInterval(timerId);
+  stopAudio();
 
   const q = localizeQuestion(questions[currentQuestionIndex]);
   setText(questionText, q.text);
@@ -296,6 +301,7 @@ function showQuestion() {
 
   nextBtn.classList.add("hidden");
   setupHint(q);
+  setupAudio(q);
 
   questionStartTime = Date.now(); // pour le temps de réponse (statistiques)
 
@@ -368,6 +374,29 @@ function revealHint() {
   setText(hintText, `💡 ${q.hint[getLang()]}`);
   hintText.classList.remove("hidden");
   hintBtn.disabled = true;
+}
+
+// Audio par question : n'affiche le bouton "Lecture" que si un fichier
+// audio existe pour la question courante (même principe que l'indice).
+function setupAudio(q) {
+  audioBtn.classList.toggle("hidden", !q.audio);
+}
+
+// Joue le fichier audio associé à la question courante.
+function playQuestionAudio() {
+  const q = localizeQuestion(questions[currentQuestionIndex]);
+  if (!q.audio) return;
+  stopAudio();
+  currentAudio = new Audio(q.audio);
+  currentAudio.play();
+}
+
+// Coupe la lecture en cours (changement de question, fin de partie...).
+function stopAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
 }
 
 function selectAnswer(index, btn) {
@@ -452,6 +481,7 @@ function nextQuestion() {
 function endQuiz() {
   clearInterval(timerId);
   clearInterval(globalTimerId);
+  stopAudio();
 
   hideElement(questionScreen);
   showElement(resultScreen);
@@ -549,6 +579,7 @@ function shareScore() {
 function restartQuiz() {
   clearInterval(timerId);
   clearInterval(globalTimerId);
+  stopAudio();
 
   hideElement(resultScreen);
   showElement(introScreen);
