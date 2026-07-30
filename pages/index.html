@@ -3,35 +3,95 @@
   <head>
     <meta charset="UTF-8" />
     <title>Quiz Dynamique</title>
-    <link rel="stylesheet" href="../assets/css/style.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/layout.css" />
+    <link rel="stylesheet" href="../assets/css/quiz.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/dark-mode.css" />
   </head>
   <body>
+    <div id="lang-switcher">
+      <label for="lang-select" data-i18n="langLabel">Langue :</label>
+      <select id="lang-select">
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+    <button id="theme-toggle" aria-pressed="false">🌙 Mode sombre</button>
     <h1>Quiz Dynamique</h1>
 
     <div id="intro-screen">
-      <p class="notice">
+      <p class="notice" data-i18n="notice">
         Testez vos connaissances en quelques questions chronométrées !
       </p>
-      <p>Meilleur score : <span id="best-score-value">0</span></p>
-      <button id="start-btn">Commencer le quiz</button>
+      <p class="field-label" data-i18n="chooseTheme">Choisis un thème :</p>
+      <div id="theme-picker" role="group" aria-label="Choix du thème"></div>
+      <p class="field-label" data-i18n="chooseMode">Mode :</p>
+      <div id="mode-picker" role="group" aria-label="Choix du mode"></div>
+      <p>
+        <span data-i18n="bestScore">Meilleur score :</span>
+        <span id="best-score-value">0</span>
+      </p>
+      <button id="start-btn" data-i18n="start">Commencer le quiz</button>
     </div>
 
     <div id="question-screen" style="display: none">
       <div id="progress">
-        Question <span id="current-question-index"></span> /
+        <span data-i18n="question">Question</span>
+        <span id="current-question-index"></span> /
         <span id="total-questions"></span>
+        <span id="difficulty-badge" aria-live="polite"></span>
       </div>
       <p id="question-text"></p>
       <div id="answers"></div>
-      <div id="timer-div">Temps restant : <span id="time-left">0</span>s</div>
-      <button id="next-btn" class="hidden">Question suivante</button>
+      <button id="hint-btn" class="hidden" data-i18n="hint">💡 Indice</button>
+      <p id="hint-text" class="hidden" aria-live="polite"></p>
+      <div id="timer-div">
+        <span data-i18n="timeLeft">Temps restant :</span>
+        <span id="time-left">0</span>s
+      </div>
+      <button id="next-btn" class="hidden" data-i18n="next">Question suivante</button>
     </div>
 
     <div id="result-screen" style="display: none">
-      <h2>Résultat final</h2>
+      <h2 data-i18n="finalResult">Résultat final</h2>
       <p id="score-text"></p>
-      <p>Meilleur score : <span id="best-score-end">0</span></p>
-      <button id="restart-btn">Recommencer</button>
+      <p id="result-best-line">
+        <span data-i18n="bestScore">Meilleur score :</span>
+        <span id="best-score-end">0</span>
+      </p>
+
+      <div id="result-details">
+        <div id="stats-block">
+          <h3 data-i18n="statsTitle">Statistiques détaillées</h3>
+          <p>
+            <span data-i18n="statsCorrect">Bonnes réponses :</span>
+            <span id="stats-correct">0</span>
+          </p>
+          <p>
+            <span data-i18n="statsWrong">Mauvaises réponses :</span>
+            <span id="stats-wrong">0</span>
+          </p>
+          <p>
+            <span data-i18n="statsAvgTime">Temps moyen par question :</span>
+            <span id="stats-avg-time">0</span>s
+          </p>
+        </div>
+
+        <h3 data-i18n="recapTitle">Récapitulatif de vos réponses</h3>
+        <table id="recap-table">
+          <thead>
+            <tr>
+              <th data-i18n="recapQuestion">Question</th>
+              <th data-i18n="recapYour">Votre réponse</th>
+              <th data-i18n="recapAnswer">Bonne réponse</th>
+            </tr>
+          </thead>
+          <tbody id="recap-body"></tbody>
+        </table>
+      </div>
+
+      <button id="restart-btn" data-i18n="restart">Recommencer</button>
     </div>
 
     <script type="module" src="../assets/js/quiz.js"></script>
