@@ -1,0 +1,108 @@
+/* components.css
+   Composants du Sprint 2 : sélecteur de thème (multi-thème) et
+   indice par question. */
+
+.field-label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #455a64;
+}
+
+/* --- Sélecteur de langue (changement de langue) --- */
+#lang-switcher {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85em;
+}
+
+#lang-switcher select {
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid #cfd8dc;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+}
+
+/* --- Sélecteurs de thème et de mode (boutons "pilule") --- */
+#theme-picker,
+#mode-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+#theme-picker button,
+#mode-picker button {
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #cfd8dc;
+}
+
+#theme-picker button:hover,
+#mode-picker button:hover {
+  background-color: #e0e0e0;
+}
+
+#theme-picker button.selected,
+#mode-picker button.selected {
+  background-color: #1976d2;
+  color: #fff;
+  border-color: #1976d2;
+}
+
+/* --- Mode flashcard : révéler la réponse (verso de la carte) --- */
+.reveal-btn {
+  display: block;
+  margin: 10px auto;
+  padding: 10px 18px;
+}
+
+.flashcard-answer {
+  max-width: 80%;
+  margin: 10px auto 0;
+  padding: 12px 16px;
+  background: #c8e6c9; /* vert clair, comme une bonne réponse */
+  border-radius: 6px;
+  color: #1b5e20;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+/* --- Bouton et boîte d'indice (indice par question) --- */
+#hint-btn {
+  background-color: #fff8e1;
+  color: #8d6e00;
+  border: 1px solid #ffe082;
+  padding: 6px 14px;
+  font-size: 0.9em;
+}
+
+#hint-btn:hover {
+  background-color: #ffecb3;
+}
+
+#hint-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+#hint-text {
+  max-width: 80%;
+  margin: 6px auto 0;
+  padding: 8px 12px;
+  background: #fff8e1;
+  border-left: 4px solid #ffca28;
+  border-radius: 4px;
+  color: #5d4037;
+  font-style: italic;
+}

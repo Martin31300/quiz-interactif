@@ -1,57 +1,20 @@
-body {
-  font-family: "Segoe UI", Arial, sans-serif;
-  margin: 20px;
-  text-align: center;
-  background: #fafafa;
-  color: #333;
+/* quiz.css
+   Éléments de jeu : progression, difficulté, réponses, feedback,
+   timer et écran de résultat. */
+
+#progress {
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #455a64;
 }
 
-h1 {
-  margin-bottom: 25px;
-}
-
-.notice {
-  font-style: italic;
-  margin-bottom: 15px;
-  color: #555;
-}
-
-button {
-  margin: 10px auto;
-  padding: 10px 20px;
-  cursor: pointer;
-  background-color: #1976d2;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #1565c0;
-}
-
-.hidden {
-  display: none;
-}
-
-#theme-select {
-  display: block;
-  margin: 10px auto 15px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-#intro-screen,
-#question-screen,
-#result-screen {
-  max-width: 600px;
-  margin: 0 auto 20px;
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+#difficulty-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: #eceff1;
+  font-size: 0.85em;
 }
 
 #answers button {
@@ -82,12 +45,6 @@ button:hover {
   color: #d32f2f; /* rouge foncé */
 }
 
-#progress {
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: #455a64;
-}
-
 #result-screen h2 {
   margin-bottom: 20px;
   color: #2e7d32; /* vert foncé */
@@ -98,6 +55,7 @@ button:hover {
   margin-bottom: 10px;
 }
 
+/* --- Statistiques détaillées (écran de résultat) --- */
 #stats-block {
   text-align: left;
   background-color: #f5f5f5;
@@ -110,6 +68,7 @@ button:hover {
   margin: 5px 0;
 }
 
+/* --- Récapitulatif des réponses (écran de résultat) --- */
 #recap-table {
   width: 100%;
   border-collapse: collapse;
