@@ -20,6 +20,7 @@ import {
 import { quizData } from "./data.js";
 import { initDarkMode, refreshDarkModeLabel } from "./theme.js";
 import { getLang, setLang, t, applyTranslations } from "./i18n.js";
+import { updateBadges } from "./badges.js";
 
 // Prépare une partie (les questions restent BILINGUES) :
 // - difficulté progressive : questions ordonnées de facile à difficile ;
@@ -27,6 +28,12 @@ import { getLang, setLang, t, applyTranslations } from "./i18n.js";
 //   réponses (`order`, permutation d'indices) tiré une fois par question.
 // La langue n'est PAS résolue ici mais à l'affichage — ainsi, changer de
 // langue en cours de partie retraduit la question courante.
+// Prépare une seule question : tire un ordre de réponses aléatoire.
+const prepareOne = (q) => {
+  const order = shuffle(q.answers.fr.map((_, i) => i));
+  return { ...q, order, correct: order.indexOf(q.correct) };
+};
+
 const prepareQuestions = (source) => {
   const byLevel = new Map();
   source.forEach((q) => {
@@ -39,11 +46,13 @@ const prepareQuestions = (source) => {
   const ordered = [];
   levels.forEach((level) => shuffle(byLevel.get(level)).forEach((q) => ordered.push(q)));
 
-  return ordered.map((q) => {
-    const order = shuffle(q.answers.fr.map((_, i) => i)); // ordre des réponses
-    return { ...q, order, correct: order.indexOf(q.correct) };
-  });
+  return ordered.map(prepareOne);
 };
+
+// Tire une question au hasard dans la banque (mode infini : pioche avec
+// répétitions possibles, il n'y a pas de limite de questions).
+const pickRandomQuestion = (source) =>
+  prepareOne(source[Math.floor(Math.random() * source.length)]);
 
 // Libellé traduit d'un niveau de difficulté (🟢/🟠/🔴).
 const difficultyLabel = (level) => t(`diff${level}`);
@@ -67,14 +76,20 @@ console.log("Quiz JS loaded...");
 // Clé de sauvegarde du meilleur score, propre à chaque thème.
 const bestScoreKey = (theme) => `bestScore_${theme}`;
 
+// Clés des statistiques cumulées (toutes parties confondues), pour les badges.
+const TOTAL_CORRECT_KEY = "totalCorrectAnswers";
+const TOTAL_QUIZZES_KEY = "totalQuizzesCompleted";
+
 // Modes de jeu (Sprint 2) :
 // - normal    : minuteur par question + score
 // - chrono    : minuteur GLOBAL unique pour tout le quiz + score
 // - flashcard : entraînement, sans minuteur ni score
+// - infinite  : questions aléatoires sans limite, le joueur arrête quand il veut
 const MODES = [
   { key: "normal", labelKey: "modeNormal" },
   { key: "chrono", labelKey: "modeChrono" },
   { key: "flashcard", labelKey: "modeFlashcard" },
+  { key: "infinite", labelKey: "modeInfinite" },
 ];
 const CHRONO_SECONDS = 30; // temps global du mode contre-la-montre
 
@@ -106,6 +121,7 @@ const answersDiv = getElement("#answers");
 const nextBtn = getElement("#next-btn");
 const startBtn = getElement("#start-btn");
 const restartBtn = getElement("#restart-btn");
+const endInfiniteBtn = getElement("#end-infinite-btn");
 
 const scoreText = getElement("#score-text");
 const timeLeftSpan = getElement("#time-left");
@@ -119,6 +135,7 @@ const hintText = getElement("#hint-text");
 
 const resultDetails = getElement("#result-details");
 const shareBtn = getElement("#share-btn");
+const badgesList = getElement("#badges-list");
 const recapBody = getElement("#recap-body");
 const statsCorrect = getElement("#stats-correct");
 const statsWrong = getElement("#stats-wrong");
@@ -130,6 +147,7 @@ nextBtn.addEventListener("click", nextQuestion);
 restartBtn.addEventListener("click", restartQuiz);
 hintBtn.addEventListener("click", revealHint);
 shareBtn.addEventListener("click", shareScore);
+endInfiniteBtn.addEventListener("click", endQuiz);
 
 // Langue : restaure le choix, traduit l'interface, branche le menu.
 const langSelect = getElement("#lang-select");
@@ -212,7 +230,13 @@ function highlightMode() {
 function startQuiz() {
   if (!currentTheme) return; // aucun thème choisi
 
-  questions = prepareQuestions(quizData[currentTheme].questions);
+  if (currentMode === "infinite") {
+    // Mode infini : on part avec une seule question tirée au hasard,
+    // les suivantes seront piochées à la volée dans nextQuestion().
+    questions = [pickRandomQuestion(quizData[currentTheme].questions)];
+  } else {
+    questions = prepareQuestions(quizData[currentTheme].questions);
+  }
 
   hideElement(introScreen);
   showElement(questionScreen);
@@ -221,7 +245,12 @@ function startQuiz() {
   score = 0;
   answersHistory = [];
 
-  setText(totalQuestionsSpan, questions.length);
+  setText(totalQuestionsSpan, currentMode === "infinite" ? "∞" : questions.length);
+  if (currentMode === "infinite") {
+    showElement(endInfiniteBtn);
+  } else {
+    hideElement(endInfiniteBtn);
+  }
 
   // Mode contre-la-montre : un seul minuteur global pour tout le quiz.
   clearInterval(globalTimerId);
@@ -270,8 +299,8 @@ function showQuestion() {
 
   questionStartTime = Date.now(); // pour le temps de réponse (statistiques)
 
-  if (currentMode === "normal") {
-    // Minuteur par question.
+  if (currentMode === "normal" || currentMode === "infinite") {
+    // Minuteur par question (aussi utilisé en mode infini).
     showElement(timerDiv);
     timeLeftSpan.textContent = q.timeLimit;
     timerId = startTimer(
@@ -403,6 +432,15 @@ function renderStats() {
 }
 
 function nextQuestion() {
+  if (currentMode === "infinite") {
+    // Pas de fin naturelle : on pioche une nouvelle question et on continue,
+    // jusqu'à ce que le joueur clique sur "Terminer le quiz".
+    questions.push(pickRandomQuestion(quizData[currentTheme].questions));
+    currentQuestionIndex++;
+    showQuestion();
+    return;
+  }
+
   currentQuestionIndex++;
   if (currentQuestionIndex < questions.length) {
     showQuestion();
@@ -440,6 +478,48 @@ function endQuiz() {
   showElement(resultDetails);
   renderRecap();
   renderStats();
+  updateAndRenderBadges();
+}
+
+// Met à jour les statistiques cumulées (toutes parties confondues), calcule
+// les badges nouvellement débloqués, et les affiche.
+function updateAndRenderBadges() {
+  const totalCorrect = loadFromLocalStorage(TOTAL_CORRECT_KEY, 0) + score;
+  const totalQuizzes = loadFromLocalStorage(TOTAL_QUIZZES_KEY, 0) + 1;
+  saveToLocalStorage(TOTAL_CORRECT_KEY, totalCorrect);
+  saveToLocalStorage(TOTAL_QUIZZES_KEY, totalQuizzes);
+
+  const { allUnlocked, newlyUnlocked } = updateBadges({
+    totalCorrect,
+    totalQuizzes,
+    hasPerfect: score === questions.length,
+  });
+
+  renderBadges(allUnlocked, newlyUnlocked);
+}
+
+// Affiche la liste des badges débloqués ; ceux obtenus lors de cette
+// partie sont mis en évidence avec la classe "badge-new".
+function renderBadges(allUnlocked, newlyUnlocked) {
+  badgesList.innerHTML = "";
+
+  if (allUnlocked.length === 0) {
+    const li = document.createElement("li");
+    li.textContent = t("noBadges");
+    badgesList.appendChild(li);
+    return;
+  }
+
+  const newlyUnlockedIds = new Set(newlyUnlocked.map((badge) => badge.id));
+  allUnlocked.forEach((badge) => {
+    const li = document.createElement("li");
+    li.textContent = `${badge.icon} ${t(badge.labelKey)}`;
+    if (newlyUnlockedIds.has(badge.id)) {
+      li.classList.add("badge-new");
+      li.title = t("newBadge");
+    }
+    badgesList.appendChild(li);
+  });
 }
 
 // Partage du score : génère un lien contenant le score et utilise le

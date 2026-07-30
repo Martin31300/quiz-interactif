@@ -51,6 +51,9 @@
         <span id="time-left">0</span>s
       </div>
       <button id="next-btn" class="hidden" data-i18n="next">Question suivante</button>
+      <button id="end-infinite-btn" class="hidden" data-i18n="endInfinite">
+        🛑 Terminer le quiz
+      </button>
     </div>
 
     <div id="result-screen" style="display: none">
@@ -62,6 +65,11 @@
       </p>
 
       <div id="result-details">
+        <div id="badges-block">
+          <h3 data-i18n="badgesTitle">Badges débloqués</h3>
+          <ul id="badges-list"></ul>
+        </div>
+
         <div id="stats-block">
           <h3 data-i18n="statsTitle">Statistiques détaillées</h3>
           <p>
